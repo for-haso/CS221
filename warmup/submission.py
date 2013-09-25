@@ -10,7 +10,8 @@ def computeMaxWordLength(text):
     max() and list comprehensions handy here.
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return max(text.split(' '), key=len)
+    # raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -23,7 +24,11 @@ def createExistsFunction(text):
     useful to use set().
     """
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    raise Exception("Not implemented yet")
+    word_set = set(text.split(' '))
+    def f(word):
+        return word in word_set
+    return f
+    # raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -35,7 +40,8 @@ def manhattanDistance(loc1, loc2):
     pairs (e.g., (3, 5)).
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return sum([loc1[x] - loc2[x] for x in range(len(loc1))])
+    #raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
