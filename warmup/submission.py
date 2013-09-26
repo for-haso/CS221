@@ -1,7 +1,7 @@
 import collections
 
 ############################################################
-# Problem 2a
+# Problem 3a
 
 def computeMaxWordLength(text):
     """
@@ -15,7 +15,7 @@ def computeMaxWordLength(text):
     # END_YOUR_CODE
 
 ############################################################
-# Problem 2b
+# Problem 3b
 
 def createExistsFunction(text):
     """
@@ -32,7 +32,7 @@ def createExistsFunction(text):
     # END_YOUR_CODE
 
 ############################################################
-# Problem 2c
+# Problem 3c
 
 def manhattanDistance(loc1, loc2):
     """
@@ -40,12 +40,12 @@ def manhattanDistance(loc1, loc2):
     pairs (e.g., (3, 5)).
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    return sum([loc1[x] - loc2[x] for x in range(len(loc1))])
+    return sum([abs(loc1[x] - loc2[x]) for x in range(len(loc1))])
     #raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
-# Problem 2d
+# Problem 3d
 
 def sparseVectorDotProduct(v1, v2):
     """
@@ -54,22 +54,27 @@ def sparseVectorDotProduct(v1, v2):
     You might find it useful to use sum() and a list comprehension.
     """
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    raise Exception("Not implemented yet")
+    item_list = v1.most_common() if len(v1) > len(v2) else v2.most_common()
+    counter = v2 if len(v1) > len(v2) else v1
+    return sum([x[1] * counter[x[0]] for x in item_list])
+    #raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
-# Problem 2e
+# Problem 3e
 
 def incrementSparseVector(v1, scale, v2):
     """
     Given two sparse vectors |v1| and |v2|, perform v1 += scale * v2.
     """
     # BEGIN_YOUR_CODE (around 2 lines of code expected)
-    raise Exception("Not implemented yet")
+    v2_list = v2.most_common()
+    for x in v2_list:
+        v1[x[0]] += x[1] * scale
     # END_YOUR_CODE
 
 ############################################################
-# Problem 2f
+# Problem 3f
 
 def computeMostFrequentWord(text):
     """
