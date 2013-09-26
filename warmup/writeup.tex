@@ -62,14 +62,36 @@ that all of this is my own work.
   The dice rolls do not have to be independent for the expectation of the sum to equal the sum of the expectation.
 
   \item
-  
+  $L(p) = p^3(1-p)^2$\\
+  If we maximize $\log(L(p))$, that is the same as maximizing $L(p)$, because the log function is one to one and increasing, so the $p$ value at the maxima of both functions are the same.
+  \begin{eqnarray*}
+  \log(L(p)) &=& \log(p^3(1-p)^2)\\
+  &=& \log(p^3) + \log((1-p)^2)\\
+  &=& 3\log(p) + 2\log(1-p)\\
+  \frac{d}{dp}\biggl[\log(L(p))\biggr] &=& 3\biggl(\frac{1}{p}\biggr) + -2\biggl(\frac{1}{1-p}\biggr)\\
+  &=& \frac{3(1-p) - 2(p)}{p(1-p)}\\
+  &=& 0\\
+  \frac{3(1-p) - 2(p)}{p(1-p)} &=& 0\\
+  3(1-p) - 2(p) &=& 0\\
+  3 - 3p &=& 2p\\
+  p &=& \frac{3}{5}\\
+  \end{eqnarray*}
+
 \end{enumerate}
 
 \section*{Problem 2}
 
 \begin{enumerate}[label=(\alph*)]
-  \item (your solution)
-  \item (your solution)
+  \item For each word in the sentence, there are 4 classifications. There are n words in the sentence. Thus, there are $4^n$ possible different tag sequences.
+  
+  \item For each rectangle, we want to define dimensions and a position. We can do this in several ways, but the easiest way to do so is to use the grid lines in the pixel grid. We need two horizontal lines and two vertical lines to define a grid. In an $n x n$ grid, there are $n + 1$ vertical edges and $n + 1$ horizontal edges. Since we're choosing two of each, the number of possibilities for each rectangle is:
+  \begin{eqnarray*}
+  \binom{n+1}{2}\binom{n+1}{2} &=& \frac{(n+1)!(n+1)!}{(n-1)!2!(n-1)!2!}\\
+  &=& \frac{(n+1)n(n+1)n}{4}\\
+  \end{eqnarray*}
+  Thus, the asymptotic complexity is $O(n^4)$
+
+  \item TODO(nisham)
 \end{enumerate}
 
 \end{document}
