@@ -85,5 +85,20 @@ def computeMostFrequentWord(text):
     You might find it useful to use collections.Counter().
     """
     # BEGIN_YOUR_CODE (around 5 lines of code expected)
-    raise Exception("Not implemented yet")
+    counter = collections.Counter(text.split())
+    most_common = counter.most_common()
+    max_count = -1
+    most_common_set = set()
+    for x in most_common:
+        if max_count < 0:
+            max_count = x[1]
+            most_common_set.add(x[0])
+        else:
+            if max_count == x[1]:
+                most_common_set.add(x[0])
+            else:
+                break
+    return most_common_set, max_count
+
+    #raise Exception("Not implemented yet")
     # END_YOUR_CODE

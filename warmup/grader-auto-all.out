@@ -39,10 +39,8 @@
             'seconds': 0},
            {'maxPoints': 1,
             'maxSeconds': 1,
-            'messages': ['Exception thrown: Not implemented yet',
-                         '  File "grader.py", line 57, in test\n    grader.requireIsEqual((set([\'the\', \'fox\']), 2), submission.computeMostFrequentWord(\'the quick brown fox jumps over the lazy fox\'))\n',
-                         '  File "/Users/nmasharani/Documents/College/Junior/1-Fall/CS221/warmup/submission.py", line 89, in computeMostFrequentWord\n    raise Exception("Not implemented yet")\n'],
+            'messages': [],
             'name': '3f-0',
-            'points': 0,
+            'points': 1,
             'seconds': 0}],
- 'totalPoints': 5}
+ 'totalPoints': 6}

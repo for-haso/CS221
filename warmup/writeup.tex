@@ -1,0 +1,75 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx}
+
+\begin{document}
+
+\begin{center}
+{\Large CS221 Fall 2013 Homework 1: Warmup}
+
+\begin{tabular}{rl}
+SUNet ID: & nisham \\
+Name: & Nisha Masharani \\
+Collaborators: & [list all the people you worked with]
+\end{tabular}
+\end{center}
+
+By turning in this assignment, I agree by the Stanford honor code and declare
+that all of this is my own work.
+
+\section*{Problem 1}
+
+\begin{enumerate}[label=(\alph*)]
+
+  \item To minimize, solve $f'(x) = 0$.
+  \begin{eqnarray*}
+  f(x) &=& \frac{1}{2}\displaystyle\sum\limits_{i=1}^n w_i (x-b_i)^2\\
+  f'(x) &=& \frac{d}{dx}\biggl[\frac{1}{2}\displaystyle\sum\limits_{i=1}^n w_i (x-b_i)^2\biggr]\\
+  &=& \frac{1}{2}\displaystyle\sum\limits_{i=1}^n 2w_i (x-b_i)\\
+  &=& \displaystyle\sum\limits_{i=1}^n w_i (x-b_i)\\
+  f'(x) &=& 0\\
+  \displaystyle\sum\limits_{i=1}^n w_i (x-b_i) &=& 0\\
+  \displaystyle\sum\limits_{i=1}^n w_i x - \displaystyle\sum\limits_{i=1}^n w_i b_i &=& 0\\
+  x \displaystyle\sum\limits_{i=1}^n w_i &=& \displaystyle\sum\limits_{i=1}^n w_i b_i\\
+  x &=& \frac{\sum_{i=1}^n w_i b_i}{\sum_{i=1}^n w_i}
+  \end{eqnarray*}
+
+  \item 
+  \begin{eqnarray*}
+  f(x) &=& \max_{a \in \lbrace1, -1\rbrace} \displaystyle\sum\limits_{j=1}^d ax_j\\
+  &=& max \biggl\lbrace \displaystyle\sum\limits_{j=1}^d x_j , \displaystyle\sum\limits_{j=1}^d -x_j \biggr\rbrace\\
+  g(x) &=& \displaystyle\sum\limits_{j=1}^d \max_{a \in \{1,-1\}} a x_j\\
+  &=& \displaystyle\sum\limits_{j=1}^d \max \biggl\lbrace x_j , -x_j \biggr\rbrace\\
+  \end{eqnarray*}
+  If all $x_j \ge 0$ or all $x_j \le 0$, then $f(x) = g(x)$ because $f(x)$ will take the sum of all $x_j$ and then take the absolute value to find the max, while $g(x)$ will take the absolute value of all $x_j$ and then sum them, resulting in the same answer if the signs of all $x_j$ are the same. If the signs of all $x_j$ are not the same, then $g(x) > f(x)$ because at least one element in the sum of $f(x)$ will be different from the others, so adding that number to the sum will decrease the magnitude of the sum. Thus, $g(x) \ge f(x)$.
+
+  \item
+  $X_i = \left \{
+     \begin{array}{ll}
+       0 & \mbox{if the ith roll is 1, 2, or 3}\\
+       4 & \mbox{if the ith roll is 4}\\
+       5 & \mbox{if the ith roll is 5}\\
+       6 & \mbox{if the ith roll is 6}\\
+     \end{array}
+   \right.
+   $
+  \begin{eqnarray*}
+  E\biggl[\displaystyle\sum\limits_{i=1}^n X_i\biggr] &=& \displaystyle\sum\limits_{i=1}^n E\biggl[X_i\biggr]\\
+  E\biggl[X_i\biggr] &=& \frac{3}{6} (0) + \frac{1}{6} (4) + \frac{1}{6} (5) + \frac{1}{6} (6) \\
+  &=& \frac{15}{6}\\
+  E\biggl[\displaystyle\sum\limits_{i=1}^n X_i\biggr] &=& \displaystyle\sum\limits_{i=1}^n E\biggl[X_i\biggr]\\
+  &=& \frac{15}{6} n
+  \end{eqnarray*}
+  The dice rolls do not have to be independent for the expectation of the sum to equal the sum of the expectation.
+
+  \item
+  
+\end{enumerate}
+
+\section*{Problem 2}
+
+\begin{enumerate}[label=(\alph*)]
+  \item (your solution)
+  \item (your solution)
+\end{enumerate}
+
+\end{document}
