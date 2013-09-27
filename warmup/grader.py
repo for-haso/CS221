@@ -57,5 +57,20 @@ def test():
     grader.requireIsEqual((set(['the', 'fox']), 2), submission.computeMostFrequentWord('the quick brown fox jumps over the lazy fox'))
 grader.addBasicPart('3f-0', test)
 
+def test():
+	f = open('3f_test', 'r')
+	text = f.read()
+	grader.requireIsEqual((set(['the', 'of']), 15), submission.computeMostFrequentWord(text))
+grader.addBasicPart('3f-1', test)
+
+def test():
+	grader.requireIsEqual((set([]), 0), submission.computeMostFrequentWord(""))
+grader.addBasicPart('3f-2', test)
+
+def test():
+	f = open('3f_test2', 'r')
+	text = f.read()
+	grader.requireIsEqual((set(['hello', 'goodbye']), 15), submission.computeMostFrequentWord(text))
+grader.addBasicPart('3f-3', test)
 
 grader.grade()

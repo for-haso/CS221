@@ -1,6 +1,10 @@
 import collections
 
 ############################################################
+# Nisha Masharani (nisham)
+# CS221 warmup assignment
+
+############################################################
 # Problem 3a
 
 def computeMaxWordLength(text):
@@ -11,7 +15,6 @@ def computeMaxWordLength(text):
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
     return max(text.split(' '), key=len)
-    # raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -28,7 +31,6 @@ def createExistsFunction(text):
     def f(word):
         return word in word_set
     return f
-    # raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -41,7 +43,6 @@ def manhattanDistance(loc1, loc2):
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
     return sum([abs(loc1[x] - loc2[x]) for x in range(len(loc1))])
-    #raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -57,7 +58,6 @@ def sparseVectorDotProduct(v1, v2):
     item_list = v1.most_common() if len(v1) > len(v2) else v2.most_common()
     counter = v2 if len(v1) > len(v2) else v1
     return sum([x[1] * counter[x[0]] for x in item_list])
-    #raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -87,18 +87,9 @@ def computeMostFrequentWord(text):
     # BEGIN_YOUR_CODE (around 5 lines of code expected)
     counter = collections.Counter(text.split())
     most_common = counter.most_common()
-    max_count = -1
-    most_common_set = set()
-    for x in most_common:
-        if max_count < 0:
-            max_count = x[1]
-            most_common_set.add(x[0])
-        else:
-            if max_count == x[1]:
-                most_common_set.add(x[0])
-            else:
-                break
+    if len(most_common) < 1:
+        return set([]), 0
+    max_count = most_common[0][1]
+    most_common_set = set([x[0] for x in most_common if x[1] == max_count])
     return most_common_set, max_count
-
-    #raise Exception("Not implemented yet")
     # END_YOUR_CODE
