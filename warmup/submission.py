@@ -14,7 +14,7 @@ def computeMaxWordLength(text):
     max() and list comprehensions handy here.
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    return max(text.split(' '), key=len)
+    return max(text.split(), key=len)
     # END_YOUR_CODE
 
 ############################################################
@@ -27,7 +27,7 @@ def createExistsFunction(text):
     useful to use set().
     """
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    word_set = set(text.split(' '))
+    word_set = set(text.split())
     def f(word):
         return word in word_set
     return f
