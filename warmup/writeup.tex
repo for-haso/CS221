@@ -1,5 +1,5 @@
 \documentclass[12pt]{article}
-\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx,comment}
 
 \begin{document}
 
@@ -9,7 +9,7 @@
 \begin{tabular}{rl}
 SUNet ID: & nisham \\
 Name: & Nisha Masharani \\
-Collaborators: & sryoung,
+Collaborators: & sryoung, alesan92
 \end{tabular}
 \end{center}
 
@@ -23,9 +23,15 @@ that all of this is my own work.
   \item To minimize, solve $f'(x) = 0$.
   \begin{eqnarray*}
   f(x) &=& \frac{1}{2}\displaystyle\sum\limits_{i=1}^n w_i (x-b_i)^2\\
+  \end{eqnarray*}
+  Find $f'(x)$.
+  \begin{eqnarray*}
   f'(x) &=& \frac{d}{dx}\biggl[\frac{1}{2}\displaystyle\sum\limits_{i=1}^n w_i (x-b_i)^2\biggr]\\
   &=& \frac{1}{2}\displaystyle\sum\limits_{i=1}^n 2w_i (x-b_i)\\
   &=& \displaystyle\sum\limits_{i=1}^n w_i (x-b_i)\\
+  \end{eqnarray*}
+  Set $f'(x) = 0$ and solve for x.
+  \begin{eqnarray*}
   f'(x) &=& 0\\
   \displaystyle\sum\limits_{i=1}^n w_i (x-b_i) &=& 0\\
   \displaystyle\sum\limits_{i=1}^n w_i x - \displaystyle\sum\limits_{i=1}^n w_i b_i &=& 0\\
@@ -33,7 +39,7 @@ that all of this is my own work.
   x &=& \frac{\sum_{i=1}^n w_i b_i}{\sum_{i=1}^n w_i}
   \end{eqnarray*}
 
-  \item 
+  \item First, let us rewrite $f(x)$ and $g(x)$ to expand out the max functions. 
   \begin{eqnarray*}
   f(x) &=& \max_{a \in \lbrace1, -1\rbrace} \displaystyle\sum\limits_{j=1}^d ax_j\\
   &=& max \biggl\lbrace \displaystyle\sum\limits_{j=1}^d x_j , \displaystyle\sum\limits_{j=1}^d -x_j \biggr\rbrace\\
@@ -68,6 +74,9 @@ that all of this is my own work.
   \log(L(p)) &=& \log(p^3(1-p)^2)\\
   &=& \log(p^3) + \log((1-p)^2)\\
   &=& 3\log(p) + 2\log(1-p)\\
+  \end{eqnarray*}
+  To find the minimum, take the derivative and set it equal to zero, then solve for p.
+  \begin{eqnarray*}
   \frac{d}{dp}\biggl[\log(L(p))\biggr] &=& 3\biggl(\frac{1}{p}\biggr) + -2\biggl(\frac{1}{1-p}\biggr)\\
   &=& \frac{3(1-p) - 2(p)}{p(1-p)}\\
   &=& 0\\
@@ -89,26 +98,27 @@ that all of this is my own work.
   \binom{n+1}{2}\binom{n+1}{2} &=& \frac{(n+1)!(n+1)!}{(n-1)!2!(n-1)!2!}\\
   &=& \frac{(n+1)n(n+1)n}{4}\\
   \end{eqnarray*}
-  Thus, the asymptotic complexity is $O(n^4)$
+  Since we're doing this for 3 rectangles (2 eyes and a mouth), the total number of arrangements is $(\frac{(n+1)n(n+1)n}{4})^3$
+  Thus, the asymptotic complexity is $O(n^{12})$
 
   \item $f(n) = \min_{1 \le i < n} [c(i, n) + f(i)]$\\
-  $T(n) = \left \{
-     \begin{array}{lr}
-       n + \displaystyle\sum\limits_{i=1}^{n-1} T(i) & n > 1\\
-       O(1) & n = 1\\
-     \end{array}
-   \right.
-   $
+  For this problem, we use dynamic programming to store all calculated values of f(i). That way, if we calculate f(i), we do not have to re-calculate f(i), which makes our program significantly more efficient.\\
   \begin{eqnarray*}
-  &=& n + T(n-1) + \displaystyle\sum\limits_{i=1}^{n-2} T(i)\\
-  T(n-1) &=& n - 1 + \displaystyle\sum\limits_{i=1}^{n-2} T(i)\\
-  T(n) &=& n + 2T(n-1) - (n-1)\\
-  &=& 1 + 2T(n-1)\\
-  &=& 1 + 2(1 + 2T(n-2))\\
-  &=& 3 + 4T(n-2)\\
-  &=& n + 2^{n-1} T(1)\\
+  f(j) &=& \min_{1 \le i < j} [c(i, j) + f(i)]\\
+  &=& \min\biggl(c(1, j) + f(1), c(2, j) + f(2), ..., c(j-1, j) + f(j-1)\biggr)\\
   \end{eqnarray*}
-  Thus, $O(f(n)) = O(2^n)$.
+  Because of the order of the minimum function, $f(1)$ is calculated first, and then is cached. Therefore, when $f(2)$ is calculated, it can just refer to the cached version of $f(1)$. Similarly, when $f(3)$ is calculated, it can refer to the cached versions of $f(1)$ and $f(2)$. Therefore, when $f(j)$ is calculated, it can simply do a constant time lookup for all values of $f(i)$ where $1 \le i < j$. Calling $c(i, j)$ is given to be constant time for all $1 \le i < j$, so calculating $c(i, j)$ for all $1 \le i < j$ takes $O(j-1)$ time because we're doing an $O(1)$ operation $j-1$ times. \\
+   \\
+  Therefore, the run time for $f(j)$ becomes the time it takes to calculate $c(i, j)$ for all $1 \le i < j$, which is $O(j-1)$, plus the time it takes to lookup all cached versions of $f(i)$ for all $1 \le i < j$, which is also $O(j-1)$. However, we cannot simply say $O(f(j)) = O(j-1)$, because the first time each $f(i)$ is called for all $1 \le i < j$, the value of $f(i)$ is not yet cached. \\
+   \\
+  Therefore, we must recursively do a calculation to find the value of $f(i)$ based on a constant time lookup of all previously cached values up to that point and constant time $c(i, j)$ calls, so $O(f(i)) = O(i)$, because all values we're using to calculate $O(i)$ are cached.\\
+   \\
+  Thus, $O(f(j)) = O(f(1) + ... + f(j-1))$, which becomes $O(1 + 2 + ... + (j-2) + (j-1))$. Therefore, we can write the total run time to be: 
+
+  \begin{eqnarray*}
+  O(f(n)) &=& O\biggl(\displaystyle\sum\limits_{i=1}^{n-1} n-i\biggr)\\
+  &=& O(n^2)\\
+  \end{eqnarray*}
 \end{enumerate}
 
 \end{document}

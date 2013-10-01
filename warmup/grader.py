@@ -16,6 +16,12 @@ grader.addBasicPart('writeupValid', lambda : grader.requireIsValidPdf('writeup.p
 
 grader.addBasicPart('3a-0', lambda :
         grader.requireIsEqual('longest', submission.computeMaxWordLength('which is the longest word')))
+grader.addBasicPart('3a-1', lambda :
+        grader.requireIsEqual('', submission.computeMaxWordLength(' ')))
+grader.addBasicPart('3a-2', lambda :
+        grader.requireIsEqual('', submission.computeMaxWordLength('')))
+grader.addBasicPart('3a-3', lambda :
+        grader.requireIsEqual('zzz', submission.computeMaxWordLength('aaa Zzz zzz bbb')))
 
 
 ############################################################
@@ -38,7 +44,9 @@ grader.addBasicPart('3c-0', lambda : grader.requireIsEqual(6, submission.manhatt
 # Problem 3d: dotProduct
 
 grader.addBasicPart('3d-0', lambda : grader.requireIsEqual(15, submission.sparseVectorDotProduct(collections.Counter({'a': 5}), collections.Counter({'b': 2, 'a': 3}))))
-
+grader.addBasicPart('3d-1', lambda : grader.requireIsEqual(20, submission.sparseVectorDotProduct(collections.Counter({'a': 5, 'c': 5}), collections.Counter({'b': 2, 'a': 3, 'c':1}))))
+grader.addBasicPart('3d-2', lambda : grader.requireIsEqual(25, submission.sparseVectorDotProduct(collections.Counter({'a': 5, 'b': 5}), collections.Counter({'b': 2, 'a': 3}))))
+grader.addBasicPart('3d-3', lambda : grader.requireIsEqual(0, submission.sparseVectorDotProduct(collections.Counter({}), collections.Counter({}))))
 
 ############################################################
 # Problem 3e: incrementSparseVector

@@ -1,0 +1,19 @@
+
+  \item $f(n) = \min_{1 \le i < n} [c(i, n) + f(i)]$\\
+  $T(n) = \left \{
+     \begin{array}{lr}
+       n + \displaystyle\sum\limits_{i=1}^{n-1} T(i) & n > 1\\
+       O(1) & n = 1\\
+     \end{array}
+   \right.
+   $
+  \begin{eqnarray*}
+  &=& n + T(n-1) + \displaystyle\sum\limits_{i=1}^{n-2} T(i)\\
+  T(n-1) &=& n - 1 + \displaystyle\sum\limits_{i=1}^{n-2} T(i)\\
+  T(n) &=& n + 2T(n-1) - (n-1)\\
+  &=& 1 + 2T(n-1)\\
+  &=& 1 + 2(1 + 2T(n-2))\\
+  &=& 3 + 4T(n-2)\\
+  &=& n + 2^{n-1} T(1)\\
+  \end{eqnarray*}
+  Thus, $O(f(n)) = O(2^n)$.
