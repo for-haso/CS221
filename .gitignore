@@ -6,6 +6,7 @@
 *.exe
 *.o
 *.so
+*.bin
 
 # Packages #
 ############
@@ -45,3 +46,8 @@ Thumbs.db
 *.log
 *.out
 *.synctex.gz
+
+# Images #
+##########
+*.png
+*.jpg

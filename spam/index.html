@@ -1,0 +1,304 @@
+<head>
+  <title>
+    Text classification for fun and profit
+  </title>
+  <script src="plugins/main.js"></script>
+  
+<link rel="stylesheet" type="text/css" href="plugins/main.css" />
+</head>
+
+<body onload="onLoad('Arun Chaganty')">
+<!------------------------------------------------------------>
+<div id="assignmentHeader"></div>
+
+<!-- Spam or Ham -->
+<p>
+<img class="float-right" src="spam.jpg" />
+</p>
+
+<p>
+According to Microsoft, circa 2007, <em><a
+    href="http://news.bbc.co.uk/2/hi/technology/7988579.stm">97% of all
+    email</a></em> is unwanted spam. Fortunately, most of us avoid the majority
+of these emails because of well-engineered spam filters. In this assignment,
+we'll build a text classification system that, despite its simplicity, can
+identify spurious email with impressive accuracy. You will then apply the same
+techniques to identify positive and negative product reviews and to classify
+email posts into topical categories.
+</p>
+
+
+<div class="problemTitle"> Problem 1: Spam Classification </div>
+
+<p>
+Let's start by building a simple rule-based system to classify email as spam or
+not-spam (<a href="http://youtu.be/anwy2MPT5RE">'ham'</a>).  To test our system,
+we will be using a corpus of email made publicly available after the legal
+proceedings of the <a href="http://en.wikipedia.org/wiki/Enron_Corpus">Enron
+  collapse</a>; within the <code>data/spam-classification/train</code> directory, you
+will find two folders <code>spam</code> and <code>ham</code>. Each folder
+contains a number of full text files that contain the whole email without
+headers and have been classified as spam and ham respectively.
+</p>
+
+<p>
+In order to implement your own spam classifier, you will subclass
+<code>Classifier</code> and implement the <code>classify</code> method
+appropriately. As usual, <code>grader.py</code> contains a number of simple test cases
+for your code. To run, type <code>python grader.py</code> in a shell.
+</p>
+<p>
+Additionally, we have provided a script <code>main.py</code> to help you
+interactively run your code with different parameters; <em>be ready to
+change this script to use alternate features, print different
+statistics, etc.</em> It's really just meant to help you get started.
+To use this script, type <code>python main.py part&lt;part&gt;</code>,
+using the section number (1.1, 1.3, 2, etc.). <code>python main.py
+  part&lt;part&gt; -h</code> lists additional parameters you might find
+useful. The script will output the classification error rate as well as
+a confusion matrix for the training and development set. Each cell of
+the confusion matrix, (<code>row</code>, <code>column</code>), of the
+matrix contains the number of elements with the true label
+<code>row</code> that have been classified as <code>column</code>.  
+</p>
+
+<h2 id="rule-based-system"><span class="header-section-number">1.1</span> Rule-based System</h2>
+<ol class="problem">
+  <li class="code">
+    <code>data/spam-classification/blacklist.txt</code> contains a list of words sorted
+    by descending spam correlation. Implement
+    <code>RuleBasedSpamClassifier</code> by discarding any email
+    containing at least one word from this list. It is recommended you
+    store the blacklist as a set to reduce look up time. For comparison,
+    our system achieved an error rate of about <em>48%</em> on the
+    training set with this heuristic.
+</li>
+  <li class="writeup">
+    Relax this heuristic by only discarding email that contains at least <span
+      class="LaTeX">$n$</span> or more of the first <span class="LaTeX">$k$</span>
+    listed words. Report your results in a 3x3 table with $n=1,2,3$ and
+    $k=10000,20000,30000$. 
+</li>
+</ol>
+
+<h2 id="linear-classifiers"><span class="header-section-number">1.2</span> Linear classifiers</h2>
+<p>
+As you have observed, this naive rule-based system is quite ineffective. 
+A reasonable diagnosis is that each
+word, whether it is <code>viagra</code> or <code>sale</code>, contributes
+equally to the 'spaminess' of the email. Let's relax this assumption by
+weighing each word separately.
+</p>
+<p>
+Consider producing a 'spaminess' score, <span class="LaTeX">$f_{\mathbb{w}}(x)$</span>, for
+each email document, <span class="LaTeX">$x$</span>, which sums the
+spaminess scores for each word in that document; <span class="LaTeX">$f_{\mathbb{w}}(x)
+  = \sum_{i=1}^{L} \mathbb{w}(\textrm{word}_i)$</span>, where <span
+  class="LaTeX">$L$</span> is the length of the document <span
+  class="LaTeX">$x$</span>, and $\mathbb{w}$ is the spaminess score of the word
+$\textrm{word}_i$. We can then use a linear classifier that will
+classify the email as spam if <span class="LaTeX">$f_{\mathbb{w}}(x) &ge; 0$</span>
+and as ham, otherwise. 
+</p>
+
+
+<p>
+Note that the order of words does not matter when computing the sum <span
+  class="LaTeX">$\sum_{i=1}^{L} \mathbb{w}(\textrm{word}_i)$</span>. Thus, it is
+convenient to represent a document as a sparse collection of words. An ideal
+data structure for this is a hash map or dictionary. For example, the document
+text <em>&quot;The quick dog chased the lazy fox over the brown
+  fence&quot;</em>, would be represented using the dictionary, <code>{'brown':
+  1, 'lazy': 1, 'fence': 1, 'fox': 1, 'over': 1, 'chased': 1, 'dog': 1, 'quick':
+  1, 'the': 2, 'The': 1}</code>.
+</p>
+
+<p>
+Let the above vector representation of a document <span class="LaTeX">$x$</span> be
+<span class="LaTeX">$\phi(x)$</span>; in this context, the vector representation
+is called a feature. The use of individual words or unigrams is a common choice
+in many language modelling tasks.  With this vector or feature representation,
+the spaminess score for a document is simply the inner product of the weights
+$\mathbb{w}$ and the document vector, <span class="LaTeX">$f_{\mathbb{w}}(x) = \mathbb{w} \cdot
+  \phi(x)$</span>.  Let the positive label (in this case "spam") be represented
+as a 1. Then, we can write the predicted output $\hat y$ of the linear
+classifier mathematically as 
+$$\hat y 
+= \left\{ \begin{matrix} 
+1 ~\textrm{if}~ \mathbb{w} \cdot \phi(x) &ge; 0\\
+-1 ~\textrm{if}~ \mathbb{w} \cdot \phi(x) &lt; 0
+\end{matrix}\right..
+$$.
+
+</p>
+
+
+<ol class="problem">
+  <li class="code">
+    Implement a function <code>extractUnigramFeatures</code> that reads
+    a document $x$ and returns the sparse vector
+    $\phi(x)$ of unigram features.
+</li>
+  <li class="code">
+    Implement the <code>classify</code> function in
+    <code>WeightedClassifier</code>. Reuse the inner product function you wrote in
+    the warmup assignment.
+  </li>
+  <li class="writeup">
+    How can this linear classifier mimic the rule-based classifier you used in
+    section 1.1? How would you mimic the behaviour of $n$ and $k$?
+  </li>
+</ol>
+
+<h2 id="learning-to-distinguish-spam"><span class="header-section-number">1.3</span> Learning to distinguish spam</h2>
+
+<p>
+The next question we need to address is where the vector of spaminess scores,
+$\mathbb{w}$, comes from. Our prediction function is a simple linear function, so we will
+use the perceptron algorithm to learn weights. The perceptron algorithm visits
+each training example and incrementally adjusts weights to improve the
+classification of the current labelled example, $(x,y)$. If $\hat y$ is the
+prediction the algorithm makes with the current set of weights, $\mathbb{w}^{(t)}$, i.e.
+$\hat y = \mathbb{I}( \mathbb{w}^{(t)} \cdot \phi(x) &ge; 0 )$, then if $\hat y \neq y$, it
+increments $\mathbb{w}^{(t)}$ by $y \times \phi(x)$. 
+</p>
+<ol class="problem">
+  <li class="code">
+  Implement <code>learnWeightsFromPerceptron</code> that takes as input a corpus
+  of training examples, and returns the $\mathbb{w}$ learned by the
+  perceptron algorithm. Initialize your weights uniformly with <span
+    class="LaTeX">$0.0$</span>. Our reference implementation with unigram
+  features had an error rate of 2.8% on the development set.
+<li class="code">
+    So far, we have looked at scores for single words or unigrams. We will now
+    consider using two adjacent words, or bigrams as features by implementing
+    <code>extractBigramFeatures</code>. To handle the edge case of a word at the beginning of a sentence, use the token <code>-BEGIN-</code>. On the previous example, <em>&quot;The
+      quick dog chased the lazy fox over the brown fence&quot;</em>,
+    <code>extractBigramFeatures</code> would return, <code>{'the brown': 1,
+      'brown': 1, 'lazy': 1, 'fence': 1, 'brown fence': 1, 'fox': 1, 'over': 1,
+      'fox over': 1, 'chased': 1, 'dog': 1, 'lazy fox': 1, 'quick dog': 1, 'The
+      quick': 1, 'the lazy': 1, 'chased the': 1, 'quick': 1, 'the': 2, 'over
+      the': 1, '-BEGIN- The': 1, 'dog chased': 1}</code>.
+</li>
+
+<li class="writeup">
+  Construct an example in which unigrams are not enough to distinguish a spammy email from genuine email, but bigrams are.
+
+</li>
+</ol>
+
+<div class="problemTitle">Problem 2: Sentiment Classification</div>
+<!--
+  * http://crono.dei.unipd.it/~dm/DATASETS/beer_review.htm
+  * http://www.cs.cornell.edu/people/pabo/movie-review-data/
+  -->
+<p>
+<img class="float-right" src="sentiment.jpg" />
+</p>
+
+<p>
+You've just constructed a spam classifier that can identify spam with a 97%
+accuracy. While this in itself is great, <em>what's really impressive is that the
+same system can easily be used to learn how to tackle other text classification
+tasks</em>.  Let's look at something that's completely different; identifying
+<a href="http://www.cs.cornell.edu/people/pabo/movie-review-data/">positive and negative movie reviews</a>. We have provided a dataset in
+<code>data/sentiment/train</code>, with labels "pos" and "neg".
+</p>
+
+<ol class="problem">
+  <li class="writeup">
+    Use the perceptron learning algorithm you wrote in the previous section to
+    classify positive and negative reviews. Report the error rate for unigram
+    features and bigram features. 
+</li>
+</li>
+  <li class="writeup">
+    Print the training and development set classification error as you vary the
+    number of iterations from 1 to 20. Does development set error rate monotonically
+    decrease with training set error rate? Why or why not? 
+
+    You might find it useful to write another version of
+    <code>learnWeightsFromPerceptron</code> that prints training and
+    development error in each iteration. Optionally, you might try
+    plotting error to visual how the two behave more clearly. We recommend the
+    <a href="http://matplotlib.org/"><code>matplotlib</code></a>
+    library.  To get started, check out this <a
+      href="http://matplotlib.org/users/pyplot_tutorial.html"><code>matplotlib</code>
+      tutorial</a>.
+</li>
+<li class="writeup">
+  Vary the number of examples given the training classifier in steps of 500.
+  Print the training and development set classification error. When does the
+  spam classifier begin to generalize well to new situations?
+</li>
+
+</ol>
+
+<div class="problemTitle">Problem 3: Document Categorization</div>
+
+<p>
+Finally, let's see how this system can be generalized to tasks with multiple labels.
+We will apply our knowledge to the task of categorizing emails based on
+topics. Our dataset in <code>data/topics/train</code> contains a number of
+emails from <a href="http://qwone.com/~jason/20Newsgroups/">20 popular USENET
+  groups</a> that have been segregated into 5 broader categories. 
+</p>
+
+<p>
+<img class="float-right" src="classification.jpg" />
+</p>
+
+<ol class="problem">
+  <li class="code">
+  <p>
+  A common approach to multi-class classification is to train one binary
+  classifier for each of the <span class="LaTeX">$K$</span> categories in
+  a &quot;one-vs-all&quot; scheme. Namely, for the binary classifier <span
+    class="LaTeX">$i$</span>, all examples labelled <span
+    class="LaTeX">$i$</span> are positive examples, and all other examples are
+  negative. When using this classifier for prediction, one uses the class label
+  with the largest score, <span class="LaTeX">$f_i(x)$</span>.
+  Implement the <code>OneVsAllClassifier</code> classifier using unigram features;
+  for reference, our implementation achieved an error rate of 17% on the development set.
+  </p>
+</li>
+
+<li class="writeup">
+  <p>Report the error rate for the unigram and bigram features.</p>
+</li>
+
+<li class="writeup">
+<p>
+Instead of combining $K$ binary classifiers, we can train a single
+multi-class classifier with an appropriate loss-function. In class, we
+studied hinge loss for binary classification, $\mathrm{Loss}(x, y,
+\mathbb{w}) = \max( 0,
+  1 - (\mathbb{w} \cdot \phi(x)) y )$, where $y$ is the true label of
+    the example $x$ and $\mathbb{w}$ are the weights of the linear
+    classifier.  Let's extend this to a multi-class setting with $K$
+    classes and let the output space be $\mathcal{Y} = \{1,\ldots, K\}$.
+    Now, each class has a separate weight vector $\mathbb{w}_1,
+    \mathbb{w}_2, \ldots, \mathbb{w}_K$. To make a prediction, we choose
+    the label with the largest score, randomly breaking ties, i.e. $\hat
+    y = \arg\max_{t \in \mathcal{Y}} \mathbb{w}_t \cdot \phi(x)$.
+    Finally, the loss on an example is $\mathrm{Loss}(x, y, \mathbb{w})
+    = \max_{t \in \mathcal{Y}}( \mathbb{I}(y \neq t) + \mathbb{w}_{t}
+    \cdot \phi(x) - \mathbb{w}_{y} \cdot \phi(x))$, where $\mathbb{I}$ is the indicator function,
+$$
+\mathbb{I}(\textrm{pred}) 
+= \left\{ \begin{matrix} 
+1 ~\textrm{if predicate is true}\\
+0 ~\textrm{if predicate is false}
+\end{matrix}\right..
+$$
+ Compute the subgradients for $\mathbb{w}_1, \ldots, \mathbb{w}_K$ for
+ this multi-class hinge loss.
+  </p>
+
+
+</li>
+
+</ol>
+
+</body>
+

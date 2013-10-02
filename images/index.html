@@ -1,0 +1,260 @@
+<head>
+  <title>Image Classification</title>
+  <script src="plugins/main.js"></script>
+</head>
+
+<body onload="onLoad('Awni Hannun')">
+
+<div id="assignmentHeader"></div>
+
+
+<center>
+  <img src="cifar.png">
+  <p style="margin-top:0px;width:500px">Figure 1: Various images of airplanes (top) and birds (bottom) from the CIFAR-10 dataset.</p>
+</center>
+
+<p>In this assignment, you will implement an image classifier that distinguishes
+birds and airplanes.  We will use the Perceptron algorithm as a starting point
+&mdash; but what should the features (arguably the most important part of machine learning) be?
+We will see that rather than specifying them by hand, as we did for spam filtering,
+we can actually learn the features automatically using the K-means clustering algorithm.
+We will be working with the <a href="http://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10</a> dataset,
+one of the standard benchmarks for image classification.
+</p>
+
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Setup</div>
+
+<p><strong>Install:</strong></p>
+
+<p>
+  This project, like most Python machine learning projects, uses NumPy. The project also has an optional dependency on the Python Image Library (PIL). We wrote an install script that makes it one command to install the packages. If you don't have NumPy or PIL (or you are not sure) run the install script that came with the project:
+  <pre>python install.py</pre>
+  The install script may not work for all operating systems and platforms.  If you have trouble installing NumPy with our script, here are some options:
+  <ul>
+    <li>Develop on the corn machines.</li>
+    <li>Download a full scientific computing suite for Python such as <a href="https://www.enthought.com/downloads/">Enthought Canopy</a>. This will come with NumPy plus other packages which may be useful for your final project.</li>
+    <li>Folllow the NumPy/SciPy <a href="http://www.scipy.org/install.html">installation instructions</a>.</li>
+  </ul>
+</p>
+
+<p><strong>NumPy:</strong></p>
+
+<p>We'll briefly review some handy functions in NumPy.  If you are very familiar with the package feel free to skip this section. For a more basic and thorough introduction see this <a href="http://wiki.scipy.org/Tentative_NumPy_Tutorial#head-6a1bc005bd80e1b19f812e1e64e0d25d50f99fe2">tutorial</a>.</p>
+
+All standard operations on vectors, matrices and n-dimensional arrays are element-wise in NumPy.  For example
+<pre>
+A = numpy.random.randn(5,5)
+B = numpy.random.randn(5,5)
+A+B # element-wise addition
+A*B # element-wise multiplication
+</pre>
+
+You can also access individual elements, columns and rows of <code>A</code> using the following notation,
+<pre>
+A[0,0] # first element of the first row of A
+A[:,1] # second column of A
+A[3:5,:] # fourth and fifth rows of A
+</pre>
+
+In order to take the matrix product of <code>A</code> and <code>B</code> use the <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.dot.html">numpy.dot</a> function.
+<pre>
+numpy.dot(A,B) # matrix multiplication A*B
+A.dot(B) # same as above
+</pre>
+
+To find the minimum or maximum element in an array or along a specific axis of an array (rows or columns for 2D), use <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.minimum.html">numpy.minimum</a> or <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.maximum.html">numpy.maximum</a>
+<pre>
+numpy.minimum(A) # min of A
+numpy.minimum(A, axis=0) # min of each column of A
+numpy.maximum(A, axis=1) # max of each row of A
+</pre>
+
+To take the indices of the minimum element in each row or column of a 2D array use the <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.argmin.html">numpy.argmin</a> function and specify the axis
+<pre>
+numpy.argmin(A,axis=0) # argmin of each column
+</pre>
+
+Similarly you can take the mean along the columns or rows of a 2D array using <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html">numpy.mean</a> and the sum along a specific axis using <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.sum.html">numpy.sum</a>
+<pre>
+numpy.mean(A,axis=0) # mean of each column of A
+numpy.sum(A,axis=1) # sum of each row of A
+</pre>
+
+<p><strong>Warmup:</strong></p>
+
+<p>Next, let's get you familiar with the task. You will be classifying an image $x$
+as either a bird ($y=1$) or a plane ($y=0$).  One way to do this is to train a
+classifier on the raw pixels, that is, $\phi(x) \in \mathbb{R}^{32 \times 32}$ vector
+where each component of the vector represents the intensity of a particular pixel.
+
+Try running this classifier with
+  <pre>python run.py --pixels</pre>
+As you can see these features do not work very well, the classifier drastically overfits the training set and as a result barely generalizes better than chance.  
+</p>
+
+<p>
+The problem here is that pixel values themselves are not really meaningful.
+We need a higher-level representation of images.
+So this is the strategy:
+Each image is a 32x32 grid of pixels.
+We will divide the image into sixteen 8x8 "patches" (Fig 2).
+Now comes the key part:
+we will use K-means to cluster all the patches into centroids.
+These centroids will then allow us to use a better feature representation of
+the image which will make the classification task much easier.</p>
+
+<center>
+  <img src="patches.png" width="300px">
+  <p style="margin-top:0px;width:500px">Figure 2: The sixteen patches of size 8x8 pixels corresponding to an image of size 32x32 pixels.</p>
+</center>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 1: K-means Reconstruction Error</div>
+
+<p>
+In this problem, we begin by getting a deeper understanding of K-means in the general setting.
+Recall that the objective function that K-means attempts to minimize is
+the reconstruction loss,
+the sum of squared Euclidean distances of each data point to
+its assigned cluster:
+</p>
+
+<p style="font-size:20px">
+<center>$\text{Loss}(\mu, z) = \sum_{i=1}^{n} \|x_i-\mu_{z_i}\|_2^2$,</center>
+</p>
+
+<p>where $n$ is the number of training examples, $x_i$ is the $i$-th data point and $\mu_k \in \mathbb{R}^d$ is the $k$-th centroid,
+and $z_i \in \{1, \dots, K\}$ is the cluster that the $i$-th point is assigned to.</p>
+
+<ol class="problem">
+
+<li class="writeup">Derive the K-means update for the centroids $\{\mu_k\}$ by minimizing
+$\sum_{i=1}^{n} \|x_i-\mu_{z_i}\|_2^2$ with respect to $\mu_k$.
+</li>
+
+
+<li class="writeup">
+Prove that the optimal reconstruction error $\min_{\mu,z} \text{Loss}(\mu, z)$
+is non-increasing as $K$ increases.
+</li>
+
+</ol>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 2: K-means<span class="codeImg"></span></div>
+
+<p>In this part of the assignment you will implement K-means clustering to
+learn centroids for a given training set. Specifically you should fill out the
+method <code>runKMeans</code> in the file <a
+  href="submission.py"><code>submission.py</code></a>.</p>
+
+<center>
+  <img src="features.png" width="300px">
+  <p style="margin-top:0px;width:500px">Figure 3: 20 centroids learned from K-means on patches from the first 1000 training images.</p>
+</center>
+
+<p>We start you off by initializing K-means with random centroids where each
+floating point number is chosen from a normal distribution with mean 0 and
+standard devation 1.</p>
+
+<p>Test the K-means code with the provided test utility in <code>grader.py</code> by running:
+  <pre>python grader.py</pre>
+</p>
+
+<p><strong>Optional:</strong> One way to determine if your K-means algorithm is learning sensible features is to view the learned centroids using our provided utility function.  To view the first 25 learned centroids, run
+  <pre>python run.py --view</pre>
+  Your centroids should look similar to Fig 3. Notice how the centroids look like edges!</p>
+
+<p><b>Note on Patches:</b> Images are composed of patches which have been converted to gray-scale followed by standard image preprocessing. This includes normalizing them for luminance and contrast as well as further <a href="http://ufldl.stanford.edu/wiki/index.php/Whitening">whitening</a>.</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 3: Feature Extraction<span class="codeImg"></span></div>
+
+<p>The next step in the pipeline is to use the centroids to generate features that will be more useful for the classification task then the raw pixel intensities. One way to do this is to represent each patch by the distance to the centroids that are closest to it, the intuition being that we can encode a patch by the centroids to which it is most similar.</p>
+
+<p>We will map each image $x$ to its new feature vector $\phi(x) \in \mathbb{R}^{16k}$, where there is a real value for each patch, centroid combination.</p>
+
+<p>Let $p_{ij} \in \mathbb{R}^{64}$ be the $(i,j)$-th patch of $x$ where $i,j = 1,...,4$. The relative activation, $a_{ijk}$, of centroid $\mu_k$ by patch $p_{ij}$ is
+defined to be the average distance from $p_{ij}$ to all centroids minus the distance from $p_{ij}$ to $\mu_k$.</p>
+
+<p style="font-size:50px">
+<center>$$ a_{ijk} = \frac{1}{K} \left(\sum\limits_{k'=1}^K {\|p_{ij}-\mu_{k'}\|_2}\right) - \|p_{ij}-\mu_k\|_2 $$</center>
+</p>
+
+<p>The feature value for patch $p_{ij}$ and centroid $\mu_k$ is the max of the relative activation and zero.</p>
+
+<p style="font-size:20px"><center>$$\phi_{ijk}(x) = \max\{0,a_{ijk}\} $$</center></p>
+
+<p>Implement the function <code>extractFeatures</code> in <a href="submission.py"><code>submission.py</code></a>.
+
+<p>We will use these features in the linear classifier below.</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 4: Supervised Training</div>
+
+<p>The final task is to use our better feature representation to classify images as birds or planes. We have provided you with a working Perceptron classifier which does fairly well.  You will implement the logistic and hinge loss updates to learn the parameters and see if either of these improves classification accuracy and which does better.</p>
+
+<p>First you can run the Perceptron classifier to see how it performs on the test set</p>
+<pre>python run.py --gradient=perceptron</pre>
+<p>You should see a test accuracy result between 60%-65% - we can do better!</p>
+
+<ol class="problem">
+
+<li class="writeup">
+<p>
+Let's try to understand SGD in a different way.
+Consider the following objective function, which intuitively tries to find a weight vector
+$\mathbb{w}_{t+1}$ which is both close to $\mathbb{w}_t$
+and tries to be in the opposite direction of $\nabla \text{Loss}(x,y; \mathbb{w})$:
+$\mathbb{w}_{t+1} = \arg\min_{\mathbb{w}} \mathbb{w}^\top \nabla \text{Loss}(x,y; \mathbb{w}) + \frac{1}{2 \eta}\| \mathbb{w} - \mathbb{w}_t \|^2$.
+Compute a closed form solution to $\mathbb{w}_{t+1}$ and relate the result to the SGD update.
+</p>
+</li>
+
+<li class="code">
+  <p>Implement the <code>logisticGradient</code> method in <a href="submission.py"><code>submission.py</code></a>.
+  <p>You can test this method with <pre>python grader.py</pre></p>
+</li>
+
+<li class="code">
+  <p>Implement the <code>hingeLossGradient</code> method in <a href="submission.py"><code>submission.py</code></a>.
+  <p>You can test this method with <pre>python grader.py</pre></p>
+</li>
+</ol>
+
+<p>Now you are ready to run the entire pipeline and evaluate performance. Run the full pipeline with:
+  <pre>python run.py --gradient=&lt;loss function&gt;</pre>
+The loss function can be any of {"hinge","logistic","perceptron"}.  The output of this should be the test accuracy on 1000 images.</p>
+
+<p>One benefit of using an unsupervised algorithm to learn features is that we can train the algorithm with unlabeled data which is much more easily obtained than labeled data.  We have included an option to train the K-means algorithm using 500 extra unlabeled images.  You can run this with
+  <pre>python run.py --gradient=hinge -m</pre>
+The performance of the supervised classifier goes up even though we are not using labeled data -- a major benefit to using an unsupervised algorithm to learn a feature representation!</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 5: Extra Credit</div>
+
+<p>If you have the full pipeline working, try to get the accuracy of the classifier on the test set as high as possible.  We will award extra credit points to the top 3 submissions.  Make sure to document your method and results in your writeup.pdf file.</p>
+
+<p>Possible directions include:</p>
+<ul>
+<li>Try another loss function or add a regularization term.</li>
+<li>Try a different optimization algorithm (batch gradient descent, second-order methods).</li>
+<li>Tune the problem hyperparameters (number of centroids, learning rate, etc.).</li>
+<li>Use more data; there are a total of 2000 training images avaialble.  If you are feeling bold, you can generate more patches using more images from <a href="http://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10</a>.</li>
+</ul>
+
+
+
+<h2>References</h2>
+
+<ul>
+  <li><strong>Learning Feature Representations with K-means</strong>, Adam Coates and Andrew Y. Ng. In Neural Networks: Tricks of the Trade, Reloaded, Springer LNCS, 2012.(<a href="http://www.stanford.edu/~acoates/papers/coatesng_nntot2012.pdf">pdf</a>)</li>
+  <li><strong>An Analysis of Single-Layer Networks in Unsupervised Feature Learning</strong>, Adam Coates, Honglak Lee, and Andrew Y. Ng. In AISTATS 14, 2011.(<a href="http://www.stanford.edu/~acoates/papers/coatesleeng_aistats_2011.pdf">pdf</a>)</li>
+  <li><strong>Learning Multiple Layers of Features from Tiny Images</strong>, Alex Krizhevsky, 2009. (<a href="http://www.cs.toronto.edu/~kriz/learning-features-2009-TR.pdf">pdf</a>)</li>
+</ul>
+
+<br/>
+<br/>
+</body>
