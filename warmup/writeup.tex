@@ -93,7 +93,7 @@ that all of this is my own work.
 \begin{enumerate}[label=(\alph*)]
   \item For each word in the sentence, there are 4 classifications. There are n words in the sentence. Thus, there are $4^n$ possible different tag sequences.
   
-  \item For each rectangle, we want to define dimensions and a position. We can do this in several ways, but the easiest way to do so is to use the grid lines in the pixel grid. We need two horizontal lines and two vertical lines to define a grid. In an $n x n$ grid, there are $n + 1$ vertical edges and $n + 1$ horizontal edges. Since we're choosing two of each, the number of possibilities for each rectangle is:
+  \item For each rectangle, we want to define dimensions and a position. We can do this in several ways, but the easiest way to do so is to use the grid lines in the pixel grid. We need two horizontal lines and two vertical lines to define a grid. In an $n \times n$ grid, there are $n + 1$ vertical edges and $n + 1$ horizontal edges. Since we're choosing two of each, the number of possibilities for each rectangle is:
   \begin{eqnarray*}
   \binom{n+1}{2}\binom{n+1}{2} &=& \frac{(n+1)!(n+1)!}{(n-1)!2!(n-1)!2!}\\
   &=& \frac{(n+1)n(n+1)n}{4}\\

@@ -32,13 +32,25 @@ def test():
     grader.requireIsEqual(True, func('lazy'))
     grader.requireIsEqual(False, func('laz'))
 grader.addBasicPart('3b-0', test)
+def test2():
+    f = open('3f_test', 'r')
+    text = f.read()
+    func = submission.createExistsFunction(text)
+    grader.requireIsEqual(True, func('calamity'))
+    grader.requireIsEqual(True, func('fardels'))
+    grader.requireIsEqual(False, func('homie'))
+    grader.requireIsEqual(False, func('calamity '))
+    grader.requireIsEqual(False, func(''))
+    grader.requireIsEqual(False, func(' '))
+grader.addBasicPart('3b-1', test2)
 
 
 ############################################################
 # Problem 3c: manhattanDistance
 
 grader.addBasicPart('3c-0', lambda : grader.requireIsEqual(6, submission.manhattanDistance((3, 5), (1, 9))))
-
+grader.addBasicPart('3c-1', lambda : grader.requireIsEqual(8, submission.manhattanDistance((1, 4, 3), (3, 2, 7))))
+grader.addBasicPart('3c-2', lambda : grader.requireIsEqual(0, submission.manhattanDistance((1, 1), (1, 1))))
 
 ############################################################
 # Problem 3d: dotProduct
@@ -56,6 +68,21 @@ def test():
     submission.incrementSparseVector(v, 2, collections.Counter({'b': 2, 'a': 3}))
     grader.requireIsEqual(collections.Counter({'a': 11, 'b': 4}), v)
 grader.addBasicPart('3e-0', test)
+def test():
+    v = collections.Counter({'a': 5, 'b': 10, 'c': 3})
+    submission.incrementSparseVector(v, 2, collections.Counter({'b': 2, 'a': 3}))
+    grader.requireIsEqual(collections.Counter({'a': 11, 'b': 14, 'c': 3}), v)
+grader.addBasicPart('3e-1', test)
+def test():
+    v = collections.Counter({})
+    submission.incrementSparseVector(v, 2, collections.Counter({'b': 2, 'a': 3}))
+    grader.requireIsEqual(collections.Counter({'a': 6, 'b': 4}), v)
+grader.addBasicPart('3e-2', test)
+def test():
+    v = collections.Counter({})
+    submission.incrementSparseVector(v, 2, collections.Counter({}))
+    grader.requireIsEqual(collections.Counter({}), v)
+grader.addBasicPart('3e-3', test)
 
 
 ############################################################
