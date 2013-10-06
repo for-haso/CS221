@@ -75,10 +75,11 @@ if __name__ == "__main__":
 
     ############################################################
     # -- 1.2c: Mimic rule-based classifier
-    grader.addManualPart('1.2c', 4)
+    grader.addManualPart('1.2c', 3)
 
     ############################################################
     # -- 1.3a: learnWeightsFromPerceptron
+
     def test1_3a_0():
         weights = submission.learnWeightsFromPerceptron(
                 trainSpamExamples[:100], 
@@ -94,7 +95,7 @@ if __name__ == "__main__":
                 trainSpamExamples, 
                 submission.extractUnigramFeatures,
                 util.LABELS_SPAM,
-                20)
+                10)
         classifier = submission.WeightedClassifier(util.LABELS_SPAM, 
                 submission.extractUnigramFeatures, weights)
         trainErr = util.computeErrorRate( trainSpamExamples, classifier )
@@ -103,10 +104,40 @@ if __name__ == "__main__":
         print "devErr: ", devErr
 
 
-        grader.requireIsLessThan( 0.02, trainErr ) # We got 0.0055
-        grader.requireIsLessThan( 0.04, devErr ) # We got 0.028
+        grader.requireIsLessThan( 0.02, trainErr ) # We got 0.0079
+        grader.requireIsLessThan( 0.06, devErr ) # We got 0.046
 
-    grader.addPart('1.3a-1', test1_3a_1, 5, 25)
+    grader.addPart('1.3a-1', test1_3a_1, 5, 45)
+
+    def test1_3a_2():
+        train = [("hello hello hello hello hello hi hello", "hello"), 
+        ("goodbye bye goodbye bye bye goodbye", "goodbye"),
+        ("hello hi hello hi hi hello hi goodbye", "hello"),
+        ("hello hi goodbye bye goodbye bye bye bye goodbye", "goodbye")]
+
+        dev = [("hello hello hello goodbye hello hi hello", "hello"), 
+        ("goodbye bye goodbye hi bye goodbye", "goodbye"),
+        ("hello hi bye hi hi hello hi goodbye", "hello"),
+        ("hello hi goodbye bye goodbye bye bye bye hi", "goodbye"),
+        ("hello hi goodbye bye hello bye bye bye hi", "goodbye")]
+
+        weights = submission.learnWeightsFromPerceptron(
+                train, 
+                submission.extractUnigramFeatures,
+                ("hello", "goodbye"),
+                10)
+        classifier = submission.WeightedClassifier(("hello", "goodbye"), 
+                submission.extractUnigramFeatures, weights)
+        trainErr = util.computeErrorRate( train, classifier )
+        devErr = util.computeErrorRate( dev, classifier )
+        print "trainErr: ", trainErr
+        print "devErr: ", devErr
+
+
+        grader.requireIsLessThan( 0.02, trainErr ) # We got 0.0079
+        grader.requireIsLessThan( 0.06, devErr ) # We got 0.046
+
+    grader.addPart('1.3a-2', test1_3a_2, 0, 0)
 
     ############################################################
     # -- 1.3b:  extractBigramFeatures
@@ -118,8 +149,12 @@ if __name__ == "__main__":
 
 
     ############################################################
-    # -- 1.3e: Unigrams vs bigrams
-    grader.addManualPart('1.3c', 5)
+    # -- 1.3c: Unigrams vs bigrams
+    grader.addManualPart('1.3c', 3)
+
+    ############################################################
+    # -- 1.3d: Vary number of examples
+    grader.addManualPart('1.3d', 2)
 
     ############################################################
     # Problem 2: Sentiment Classification
@@ -130,15 +165,12 @@ if __name__ == "__main__":
 
     ############################################################
     # -- 2a: Use perceptron for sentiment classification
-    grader.addManualPart('2a-0', 3)
+    grader.addManualPart('2a-0', 1)
 
 
     ############################################################
-    # -- 1.3b: Vary number of iterations
-    grader.addManualPart('1.3b', 5)
-    ############################################################
-    # -- 1.3c: Vary number of examples
-    grader.addManualPart('1.3c', 5)
+    # -- 2b: Vary number of iterations
+    grader.addManualPart('2b', 3)
 
     ############################################################
     # Problem 3: Document Categorization
@@ -171,10 +203,10 @@ if __name__ == "__main__":
                 classifier.classifyWithLabel( "The dog jumped over the fence and on to the field") ) # -2, 0, 1
     grader.addBasicPart('3a-0', test_3a_0, 0)
 
-
     ############################################################
     # -- 3b: Report accuracies for one-vs-all
-    grader.addManualPart('3b', 5)
+    grader.addManualPart('3b-0', 2)
+
 
     ############################################################
     # -- 3c: Multi-class hinge loss

@@ -72,7 +72,7 @@ ol.problem li.both {
 .homepageTitle {font-size:28; font-weight:bold; color:#990000}
 @media print {.homepageTitle {font-size:20}}
 .scheduledTopic {font-weight:bold; color:#990000}
-.pdfLink {font-size:14}
+.pdfLink {font-size:13}
 
 /* For polling page */
 #question { font-size: 24px; }

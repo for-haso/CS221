@@ -54,16 +54,17 @@
 })();
 
 function fixScrollPosition() {
-  if (typeof(localStorage) == 'undefined' || localStorage == null) var localStorage = {};
+  var store = {};
+  if (typeof(localStorage) != 'undefined' && localStorage != null) store = localStorage;
 
   var scrollTopKey = window.location.pathname+'.scrollTop';
   // Because we insert MathJax, we lose the scrolling position, so we have to
   // put it back manually.
   window.onscroll = function() {
-    localStorage[scrollTopKey] = document.body.scrollTop;
+    store[scrollTopKey] = document.body.scrollTop;
   }
-  if (localStorage.scrollTop)
-    window.scrollTo(0, localStorage[scrollTopKey]);
+  if (store.scrollTop)
+    window.scrollTo(0, store[scrollTopKey]);
 }
 
 function onLoad(ownerName, attributionHtml) {

@@ -43,12 +43,10 @@ def part2(args):
     examples = util.loadExamples(TRAIN_PATH_SENTIMENT)[:args.examples]
     labels = util.LABELS_SENTIMENT
     trainExamples, devExamples = util.holdoutExamples(examples)
-    # weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
-    # classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
-    # weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels)
+    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
+    classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
+    # weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
     # classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
-    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractSentimentFeatures, labels, args.iters)
-    classifier = submission.WeightedClassifier(labels, submission.extractSentimentFeatures, weights)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
 

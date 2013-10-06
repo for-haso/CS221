@@ -21,6 +21,12 @@ def isTracebackItemGrader(item):
 def isCollection(x):
     return isinstance(x, list) or isinstance(x, tuple)
 
+def dumpYamlOrPprint(haveYaml, x, out, yaml=None):
+    if haveYaml:
+        yaml.dump(x, out)
+    else:
+        pprint.pprint(x, stream=out)
+
 # Return whether two answers are equal.
 def isEqual(trueAnswer, predAnswer):
     # Handle floats specially
@@ -83,6 +89,10 @@ class Part:
         self.points = 0
         self.seconds = 0
         self.messages = []
+        self.failed = False
+
+    def fail(self):
+        self.failed = True
 
 class Grader:
     def __init__(self, args=sys.argv):
@@ -140,10 +150,10 @@ class Grader:
             startTime = datetime.datetime.now()
             try:
                 TimeoutFunction(part.gradeFunc, part.maxSeconds)() # Call the part's function
-            except TimeoutFunction, e:
+            except TimeoutFunctionException as e:
                 self.fail('Time limit (%s seconds) exceeded.' % part.maxSeconds)
-            except Exception, e:
-                self.fail('Exception thrown: %s' % str(e))
+            except Exception as e:
+                self.fail('Exception thrown: %s -- %s' % (str(type(e)), str(e)))
                 self.printException()
             endTime = datetime.datetime.now()
             part.seconds = (endTime - startTime).seconds
@@ -157,6 +167,7 @@ class Grader:
             import yaml
             haveYaml = True
         except ImportError:
+            yaml = None
             haveYaml = False
 
         try:
@@ -196,10 +207,7 @@ class Grader:
             resultParts.append(r)
         result['parts'] = resultParts
         out = open('grader-auto-%s.out' % self.mode, 'w')
-        if haveYaml:
-            yaml.dump(result, out)
-        else:
-            pprint.pprint(result, stream=out)
+        dumpYamlOrPprint(haveYaml, result, out, yaml=yaml)
         out.close()
 
         # Only create if doesn't exist (be careful not to overwrite the manual!)
@@ -217,17 +225,17 @@ class Grader:
                     resultParts.append(r)
                 result['parts'] = resultParts
                 out = open('grader-manual.out', 'w')
-                yaml.dump(result, out)
+                dumpYamlOrPprint(haveYaml, result, out, yaml=yaml)
                 out.close()
             else:
                 print 'grader-manual.out already exists'
         print "Total max points: %d" % (maxTotalPoints + sum(part.maxPoints for part in self.manualParts))
 
     # Called by the grader to modify state of the current part
-    def addPoints(self, amt): self.currentPart.points += amt
-    def deductPoints(self, amt): self.currentPart.points -= amt
+
     def assignFullCredit(self):
-        self.currentPart.points = self.currentPart.maxPoints
+        if not self.currentPart.failed:
+            self.currentPart.points = self.currentPart.maxPoints
         return True
 
     def requireIsValidPdf(self, path):
@@ -272,6 +280,9 @@ class Grader:
 
     def fail(self, message):
         self.addMessage(message)
+        if self.currentPart:
+            self.currentPart.points = 0
+            self.currentPart.fail()
         return False
 
     def printException(self):

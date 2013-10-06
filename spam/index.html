@@ -67,7 +67,7 @@ matrix contains the number of elements with the true label
   <li class="code">
     <code>data/spam-classification/blacklist.txt</code> contains a list of words sorted
     by descending spam correlation. Implement
-    <code>RuleBasedSpamClassifier</code> by discarding any email
+    <code>RuleBasedClassifier</code> by discarding any email
     containing at least one word from this list. It is recommended you
     store the blacklist as a set to reduce look up time. For comparison,
     our system achieved an error rate of about <em>48%</em> on the
@@ -76,7 +76,7 @@ matrix contains the number of elements with the true label
   <li class="writeup">
     Relax this heuristic by only discarding email that contains at least <span
       class="LaTeX">$n$</span> or more of the first <span class="LaTeX">$k$</span>
-    listed words. Report your results in a 3x3 table with $n=1,2,3$ and
+    listed words. Report your results on the training set in a 3x3 table with $n=1,2,3$ and
     $k=10000,20000,30000$. 
 </li>
 </ol>
@@ -164,15 +164,19 @@ increments $\mathbb{w}^{(t)}$ by $y \times \phi(x)$.
 </p>
 <ol class="problem">
   <li class="code">
-  Implement <code>learnWeightsFromPerceptron</code> that takes as input a corpus
-  of training examples, and returns the $\mathbb{w}$ learned by the
-  perceptron algorithm. Initialize your weights uniformly with <span
-    class="LaTeX">$0.0$</span>. Our reference implementation with unigram
-  features had an error rate of 2.8% on the development set.
+  Implement <code>learnWeightsFromPerceptron</code> that takes as input
+  a corpus of training examples, and returns the $\mathbb{w}$ learned by
+  the perceptron algorithm. Initialize your weights uniformly with 0.0.
+  Our reference implementation with unigram features had an error rate
+  of about 2.8% on the development set.
+  (Those who downloaded the spam assignment early might see 3.55% dev error.
+  The current version of the assignment gives us 2.12% dev error)
+  </li>
+
 <li class="code">
     So far, we have looked at scores for single words or unigrams. We will now
     consider using two adjacent words, or bigrams as features by implementing
-    <code>extractBigramFeatures</code>. To handle the edge case of a word at the beginning of a sentence, use the token <code>-BEGIN-</code>. On the previous example, <em>&quot;The
+    <code>extractBigramFeatures</code>. To handle the edge case of a word at the beginning of a sentence (i.e. after a punctuation like '.', '!' or '?'), use the token <code>-BEGIN-</code>. On the previous example, <em>&quot;The
       quick dog chased the lazy fox over the brown fence&quot;</em>,
     <code>extractBigramFeatures</code> would return, <code>{'the brown': 1,
       'brown': 1, 'lazy': 1, 'fence': 1, 'brown fence': 1, 'fox': 1, 'over': 1,
@@ -185,6 +189,16 @@ increments $\mathbb{w}^{(t)}$ by $y \times \phi(x)$.
   Construct an example in which unigrams are not enough to distinguish a spammy email from genuine email, but bigrams are.
 
 </li>
+
+<li class="writeup">
+  Vary the number of examples given to the training classifier in steps of
+  500 from 500 to 5,000. Print the training and development set
+  classification error when using unigram features. How did the
+  additional data help the training and development set error? 
+</li>
+
+
+
 </ol>
 
 <div class="problemTitle">Problem 2: Sentiment Classification</div>
@@ -208,13 +222,14 @@ tasks</em>.  Let's look at something that's completely different; identifying
 <ol class="problem">
   <li class="writeup">
     Use the perceptron learning algorithm you wrote in the previous section to
-    classify positive and negative reviews. Report the error rate for unigram
+    classify positive and negative reviews. Report the train and development set error rate for unigram
     features and bigram features. 
 </li>
 </li>
   <li class="writeup">
     Print the training and development set classification error as you vary the
-    number of iterations from 1 to 20. Does development set error rate monotonically
+    number of iterations from 1 to 20. <b>Use bigram features for this part.</b>
+    Does development set error rate monotonically
     decrease with training set error rate? Why or why not? 
 
     You might find it useful to write another version of
@@ -226,12 +241,6 @@ tasks</em>.  Let's look at something that's completely different; identifying
       href="http://matplotlib.org/users/pyplot_tutorial.html"><code>matplotlib</code>
       tutorial</a>.
 </li>
-<li class="writeup">
-  Vary the number of examples given the training classifier in steps of 500.
-  Print the training and development set classification error. When does the
-  spam classifier begin to generalize well to new situations?
-</li>
-
 </ol>
 
 <div class="problemTitle">Problem 3: Document Categorization</div>
@@ -258,13 +267,15 @@ emails from <a href="http://qwone.com/~jason/20Newsgroups/">20 popular USENET
     class="LaTeX">$i$</span> are positive examples, and all other examples are
   negative. When using this classifier for prediction, one uses the class label
   with the largest score, <span class="LaTeX">$f_i(x)$</span>.
-  Implement the <code>OneVsAllClassifier</code> classifier using unigram features;
-  for reference, our implementation achieved an error rate of 17% on the development set.
+  Implement the <code>OneVsAllClassifier</code> classifier (and <code>MultiClassClassifier</code>);
+  for reference, our implementation achieved an error rate of 17% on the development set when using unigram features.
+  In order to train this classifier, you will also need to implement <code>learnOneVsAllClassifiers</code> that will appropriately train $K$ binary classifiers on the provided input data.
   </p>
 </li>
 
 <li class="writeup">
-  <p>Report the error rate for the unigram and bigram features.</p>
+<p>Report the train and development set error rate for unigram
+features and bigram features. </p>
 </li>
 
 <li class="writeup">
