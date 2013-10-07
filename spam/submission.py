@@ -57,7 +57,7 @@ class RuleBasedClassifier(Classifier):
         for word in words:
             if word in self.blacklist:
                 num_spam_words += 1
-        return 1 if num_spam_words >= self.n else -1
+        return 1.0 if num_spam_words >= self.n else -1.0
         # END_YOUR_CODE
 
 def extractUnigramFeatures(x):
@@ -67,13 +67,12 @@ def extractUnigramFeatures(x):
     @return dict: feature vector representation of x.
     """
     # BEGIN_YOUR_CODE (around 6 lines of code expected)
-    words = x.split()
     feature = dict()
-    for word in words:
-        if word not in feature:
-            feature[word] = 1.0
-        else:
+    for word in x.split():
+        if word in feature:
             feature[word] += 1.0
+        else:
+            feature[word] = 1.0
     return feature
     # END_YOUR_CODE
 
@@ -87,7 +86,7 @@ def dotProduct(v1, v2):
     # v1 <= v2 in all cases
     if len(v1) > len(v2):
         v1, v2 = v2, v1
-    return sum([v1[k] * v2[k] if k in v2 else 0.0 for k in v1])
+    return sum([v1[k] * v2[k] for k in v1 if k in v2])
 
 
 class WeightedClassifier(Classifier):
@@ -145,6 +144,11 @@ def learnWeightsFromPerceptron(trainExamples, featureExtractor, labels, iters = 
     return weights
     # END_YOUR_CODE
 
+def isEndPunctuation(c):
+    if (c == "!" or c == "?" or c == "."):
+        return True
+    return False
+
 def extractBigramFeatures(x):
     """
     Extract unigram + bigram features for a text document $x$. 
@@ -153,17 +157,38 @@ def extractBigramFeatures(x):
     @return dict: feature vector representation of x.
     """
     # BEGIN_YOUR_CODE (around 12 lines of code expected)
-    raise Exception("Not implemented yet")
+    words = x.split()
+    feature = dict()
+    prev_word = "-BEGIN-"
+    for word in words:
+        if isEndPunctuation(prev_word):
+            prev_word = "-BEGIN-"
+
+        if word in feature:
+            feature[word] += 1.0
+        else:
+            feature[word] = 1.0
+
+        word_pair = prev_word + " " + word
+        if word_pair in feature:
+            feature[word_pair] += 1.0
+        else:
+            feature[word_pair] = 1.0
+
+        prev_word = word
+    return feature
     # END_YOUR_CODE
 
 class MultiClassClassifier(object):
     def __init__(self, labels, classifiers):
         """
         @param list string: List of labels
-        @param list (string, Classifier): tuple of (label, classifier); each classifier is a WeightedClassifier that detects label vs NOT-label
+        @param list (string, Classifier): tuple of (label, classifier); 
+        each classifier is a WeightedClassifier that detects label vs NOT-label
         """
         # BEGIN_YOUR_CODE (around 2 lines of code expected)
-        raise Exception("Not implemented yet")
+        self.labels = labels
+        self.classifiers = classifiers
         # END_YOUR_CODE
 
     def classify(self, x):
@@ -179,15 +204,18 @@ class MultiClassClassifier(object):
         @return string y: one of the output labels
         """
         # BEGIN_YOUR_CODE (around 2 lines of code expected)
-        raise Exception("Not implemented yet")
+        scores = self.classify(x)
+        return max(scores, key=lambda score:score[1])[0]
         # END_YOUR_CODE
 
 class OneVsAllClassifier(MultiClassClassifier):
     def __init__(self, labels, classifiers):
         """
         @param list string: List of labels
-        @param list (string, Classifier): tuple of (label, classifier); the classifier is the one-vs-all classifier
+        @param list (string, Classifier): tuple of (label, classifier); 
+        the classifier is the one-vs-all classifier
         """
+        print "create one all classifier"
         super(OneVsAllClassifier, self).__init__(labels, classifiers)
 
     def classify(self, x):
@@ -196,7 +224,11 @@ class OneVsAllClassifier(MultiClassClassifier):
         @return list (string, double): list of labels with scores 
         """
         # BEGIN_YOUR_CODE (around 4 lines of code expected)
-        raise Exception("Not implemented yet")
+        scores = list()
+        for classifier in self.classifiers:
+            score = classifier[1].classify(x)
+            scores.append((classifier[0], score))
+        return scores
         # END_YOUR_CODE
 
 def learnOneVsAllClassifiers( trainExamples, featureFunction, labels, perClassifierIters = 10 ):
@@ -211,6 +243,11 @@ def learnOneVsAllClassifiers( trainExamples, featureFunction, labels, perClassif
     @return list (label, Classifier)
     """
     # BEGIN_YOUR_CODE (around 10 lines of code expected)
-    raise Exception("Not implemented yet")
+    print "learn classifiers"
+    classifiers = list()
+    for label in labels:
+        weights = learnWeightsFromPerceptron(trainExamples, featureFunction, (label, ""), perClassifierIters)
+        classifier = WeightedClassifier((label, ""), featureFunction, weights)
+        classifiers.append((label, classifier))
+    return classifiers
     # END_YOUR_CODE
-
