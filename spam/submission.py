@@ -53,11 +53,12 @@ class RuleBasedClassifier(Classifier):
         """
         # BEGIN_YOUR_CODE (around 8 lines of code expected)
         num_spam_words = 0
-        words = text.split()
-        for word in words:
+        for word in text.split():
             if word in self.blacklist:
                 num_spam_words += 1
-        return 1.0 if num_spam_words >= self.n else -1.0
+            if num_spam_words >= self.n:
+                return 1.0
+        return -1.0
         # END_YOUR_CODE
 
 def extractUnigramFeatures(x):
@@ -133,13 +134,17 @@ def learnWeightsFromPerceptron(trainExamples, featureExtractor, labels, iters = 
     """
     # BEGIN_YOUR_CODE (around 15 lines of code expected)
     weights = dict()
+    feature_vectors = [None] * len(trainExamples)
     for i in range(0, iters):
-        for train in trainExamples:
-            features = featureExtractor(train[0])
+        for i, train in enumerate(trainExamples):
+            # TODO memoize for speed up
+            if feature_vectors[i] == None:
+                feature_vectors[i] = featureExtractor(train[0])
+            features = feature_vectors[i]
             score = dotProduct(weights, features)
             actual_result = 1.0 if train[1] == labels[0] else -1.0
-            margin = score * actual_result
-            if margin <= 0:
+            predicted_result = 1.0 if score >= 0 else -1.0
+            if actual_result != predicted_result:
                 incrementSparseVector(weights, actual_result, features)
     return weights
     # END_YOUR_CODE
@@ -157,10 +162,9 @@ def extractBigramFeatures(x):
     @return dict: feature vector representation of x.
     """
     # BEGIN_YOUR_CODE (around 12 lines of code expected)
-    words = x.split()
     feature = dict()
     prev_word = "-BEGIN-"
-    for word in words:
+    for word in x.split():
         if isEndPunctuation(prev_word):
             prev_word = "-BEGIN-"
 
@@ -169,7 +173,7 @@ def extractBigramFeatures(x):
         else:
             feature[word] = 1.0
 
-        word_pair = prev_word + " " + word
+        word_pair = "".join([prev_word, " ", word])
         if word_pair in feature:
             feature[word_pair] += 1.0
         else:
@@ -178,7 +182,7 @@ def extractBigramFeatures(x):
         prev_word = word
     return feature
     # END_YOUR_CODE
-
+    
 class MultiClassClassifier(object):
     def __init__(self, labels, classifiers):
         """

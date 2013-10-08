@@ -1,11 +1,6 @@
 import collections
 import numpy as np
 
-def distance_squared(p1, p2):
-	v = p1 - p2
-	# we want the norm squared, so just return the dot prod
-	return np.dot(v,v)
-
 ############################################################
 # Problem 2
 def runKMeans(k,patches,maxIter):
@@ -24,20 +19,24 @@ def runKMeans(k,patches,maxIter):
 	# with patchSize rows and k columns. Each column is a centroid.
 	centroids = np.random.randn(patches.shape[0],k)
 	numPatches = patches.shape[1]
+	centroids = np.transpose(centroids)
+	patches = np.transpose(patches)
+
 	for i in range(maxIter):
-		# BEGIN_YOUR_CODE (around 19 lines of code expected)
-		new_centroids = np.random.randn(patches.shape[0],k)
+		new_centroids = np.zeros((k, centroids.shape[1]))
 		new_centroids_count = np.zeros(k)
-
+		# for all columns in patches, subtract all columns in centroids
+		# creates a 3D array 
+		# [[patches[0]-centroids[0], patches[0]-centroids[1], ...], 
+		#  [patches[1]-centroids[0], patches[1]-centroids[1], ...]]
+		differences = patches[:,None] - centroids[None,:]
+		centroid_indices = np.argmin([np.sum(np.square(differences), axis=2)], axis=2).flatten()
 		for j in range(numPatches):
-			centroid = np.argmin([distance_squared(patches[:,j], centroids[:,x]) for x in range(k)])
-			new_centroids[:,centroid] = new_centroids[:,centroid] + patches[:,j]
-			new_centroids_count[centroid] += 1.0
+			new_centroids[centroid_indices[j]] = new_centroids[centroid_indices[j]] + patches[j]
+			new_centroids_count[centroid_indices[j]] += 1.0
 
-		for j in range(k):
-			centroids[:,j] = new_centroids[:,j] / new_centroids_count[j] if new_centroids_count[j] != 0.0 else centroids[:,j]
-		# END_YOUR_CODE
-	return centroids
+		centroids = new_centroids / new_centroids_count[:, np.newaxis] 
+	return np.transpose(centroids)
 
 ############################################################
 # Problem 3

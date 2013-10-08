@@ -19,7 +19,22 @@ that all of this is my own work.
 \section*{Problem 1}
 
 \begin{enumerate}[label=(\alph*)]
-  \item (your solution)
+  \item To minimize $\sum_{i=1}^{n} \|x_i-\mu_{z_i}\|_2^2$, take the derivative with respect to $\mu_k$ and set it to zero. In this case, because we are taking the derivative of the sum, all elements of the sum where $\mu_{z_i} \ne \mu_k$ go to zero, and we are left with a sum over all elements where $z_i = k$.
+
+  \begin{eqnarray*}
+  \frac{d}{d\mu_k}\biggl[\sum_{i=1}^{n} \|x_i-\mu_{z_i}\|_2^2\biggr] &=& \sum_{i:z_i = k} \|x_i-\mu_{z_i}\|_2 \\
+  \end{eqnarray*}
+
+  We then set the derivative to be zero, and solve for $\mu_k$. We can pull $\mu_k$ out of the sum because it is a constant.
+
+  \begin{eqnarray*}
+  \sum_{i:z_i = k} \|x_i-\mu_{z_i}\|_2 &=& 0\\
+  \sum_{i:z_i = k} \|x_i-\mu_k\|_2 &=& 0\\
+  -\mu_k * |{i:z_i = k}| + \sum_{i:z_i = k} \|x_i\| &=& 0\\
+  \sum_{i:z_i = k} \|x_i\| &=& \mu_k * |{i:z_i = k}|\\
+
+  \end{eqnarray*}
+
   \item (your solution)
 \end{enumerate}
 

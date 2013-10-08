@@ -32,8 +32,8 @@ def part1_3(args):
     examples = util.loadExamples(TRAIN_PATH_SPAM)[:args.examples]
     labels = util.LABELS_SPAM
     trainExamples, devExamples = util.holdoutExamples(examples)
-    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
-    classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
+    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
+    classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
 
