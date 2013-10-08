@@ -215,7 +215,6 @@ class OneVsAllClassifier(MultiClassClassifier):
         @param list (string, Classifier): tuple of (label, classifier); 
         the classifier is the one-vs-all classifier
         """
-        print "create one all classifier"
         super(OneVsAllClassifier, self).__init__(labels, classifiers)
 
     def classify(self, x):
@@ -243,7 +242,6 @@ def learnOneVsAllClassifiers( trainExamples, featureFunction, labels, perClassif
     @return list (label, Classifier)
     """
     # BEGIN_YOUR_CODE (around 10 lines of code expected)
-    print "learn classifiers"
     classifiers = list()
     for label in labels:
         weights = learnWeightsFromPerceptron(trainExamples, featureFunction, (label, ""), perClassifierIters)

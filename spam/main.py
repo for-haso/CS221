@@ -21,8 +21,10 @@ def part1_1(args):
     examples = util.loadExamples(TRAIN_PATH_SPAM)[:args.examples]
     labels = util.LABELS_SPAM
     trainExamples, devExamples = util.holdoutExamples(examples)
+    """classifier = submission.RuleBasedClassifier( 
+                        labels, util.loadBlacklist(), args.n, args.k)"""
     classifier = submission.RuleBasedClassifier( 
-            labels, util.loadBlacklist(), args.n, args.k)
+            labels, util.loadBlacklist(), 3, 30000)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
 

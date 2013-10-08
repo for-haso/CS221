@@ -23,28 +23,21 @@ def runKMeans(k,patches,maxIter):
 	# This line starts you out with randomly initialized centroids in a matrix 
 	# with patchSize rows and k columns. Each column is a centroid.
 	centroids = np.random.randn(patches.shape[0],k)
-
 	numPatches = patches.shape[1]
-	
-	patches = np.transpose(patches)
-	centroids = np.transpose(centroids)
 	for i in range(maxIter):
 		# BEGIN_YOUR_CODE (around 19 lines of code expected)
-		centroid_points = dict()
-		for j in range(numPatches):
-			centroid = np.argmin([distance_squared(patches[j], centroids[x]) for x in range(k)]) 
+		new_centroids = np.random.randn(patches.shape[0],k)
+		new_centroids_count = np.zeros(k)
 
-			if centroid in centroid_points:
-				centroid_points[centroid].append(patches[j])
-			else:
-				centroid_points[centroid] = list()
-				centroid_points[centroid].append(patches[j])
+		for j in range(numPatches):
+			centroid = np.argmin([distance_squared(patches[:,j], centroids[:,x]) for x in range(k)])
+			new_centroids[:,centroid] = new_centroids[:,centroid] + patches[:,j]
+			new_centroids_count[centroid] += 1.0
 
 		for j in range(k):
-			centroids[j] = 1.0 * np.sum(centroid_points[j], axis=0) / len(centroid_points[j])
-
+			centroids[:,j] = new_centroids[:,j] / new_centroids_count[j] if new_centroids_count[j] != 0.0 else centroids[:,j]
 		# END_YOUR_CODE
-	return np.transpose(centroids)
+	return centroids
 
 ############################################################
 # Problem 3
@@ -102,11 +95,9 @@ def logisticGradient(theta,featureVector,y):
 	"""
 
 	# BEGIN_YOUR_CODE (around 2 lines of code expected)
-	# Loss(x, y; w) = log(1 + exp(-(w*phi)y))
-	# gradient(Loss) = (1 / (1 + exp(-(w*phi)y))) * (-phi * y * exp(-(w*phi)y))
 	y = -1.0 if y == 0 else 1.0
 	u = np.exp(-1.0 * (np.dot(theta, featureVector)) * y)
-	return np.array(1.0 * (-1.0 * featureVector * y * u) / (1 + u))
+	return 1.0 * (-1.0 * featureVector * y * u) / (1 + u)
 	# END_YOUR_CODE
 
 ############################################################
