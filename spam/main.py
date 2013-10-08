@@ -21,10 +21,8 @@ def part1_1(args):
     examples = util.loadExamples(TRAIN_PATH_SPAM)[:args.examples]
     labels = util.LABELS_SPAM
     trainExamples, devExamples = util.holdoutExamples(examples)
-    """classifier = submission.RuleBasedClassifier( 
-                        labels, util.loadBlacklist(), args.n, args.k)"""
     classifier = submission.RuleBasedClassifier( 
-            labels, util.loadBlacklist(), 3, 30000)
+            labels, util.loadBlacklist(), args.n, args.k)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
 
@@ -45,10 +43,10 @@ def part2(args):
     examples = util.loadExamples(TRAIN_PATH_SENTIMENT)[:args.examples]
     labels = util.LABELS_SENTIMENT
     trainExamples, devExamples = util.holdoutExamples(examples)
-    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
-    classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
-    # weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
-    # classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
+    #weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
+    #classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
+    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
+    classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
 
@@ -58,7 +56,7 @@ def part3(args):
     labels = util.LABELS_TOPICS
     trainExamples, devExamples = util.holdoutExamples(examples)
 
-    classifiers = submission.learnOneVsAllClassifiers( trainExamples, submission.extractBigramFeatures, labels, 10 )
+    classifiers = submission.learnOneVsAllClassifiers( trainExamples, submission.extractUnigramFeatures, labels, 10 )
     classifier = submission.OneVsAllClassifier(labels, classifiers)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
