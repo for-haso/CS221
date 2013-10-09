@@ -67,12 +67,18 @@ def extractFeatures(patches,centroids):
 	centroids = np.transpose(centroids)
 	patches = np.transpose(patches)
 
+	differences = patches[:,None] - centroids[None,:]
+	
+	dists = np.sqrt(np.sum(np.square(differences), axis=2))
 	# BEGIN_YOUR_CODE (around 9 lines of code expected)
 	for i in range(numPatches):
-		avg_dist = np.average([distance(patches[i], centroid) for centroid in centroids])
-		for j in range(k):
-			activation = avg_dist - distance(patches[i], centroids[j])
-			features[i][j] = activation if activation >= 0.0 else 0.0
+		avg_dist = np.average(dists[i])
+		activations = avg_dist - dists[i]
+
+		for j, activation in enumerate(activations):
+		    if activation < 0.0:
+		        activations[j] = 0.0
+		features[i] = activations
 
 	# END_YOUR_CODE
 	return features
