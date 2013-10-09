@@ -30,6 +30,7 @@ def runKMeans(k,patches,maxIter):
 		# [[patches[0]-centroids[0], patches[0]-centroids[1], ...], 
 		#  [patches[1]-centroids[0], patches[1]-centroids[1], ...]]
 		differences = patches[:,None] - centroids[None,:]
+		# for patch i, centroid_indices[i] is the index of the centroid closest to patch i
 		centroid_indices = np.argmin([np.sum(np.square(differences), axis=2)], axis=2).flatten()
 		for j in range(numPatches):
 			new_centroids[centroid_indices[j]] = new_centroids[centroid_indices[j]] + patches[j]

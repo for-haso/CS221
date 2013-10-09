@@ -32,17 +32,29 @@ that all of this is my own work.
   \sum_{i:z_i = k} \|x_i-\mu_k\|_2 &=& 0\\
   -\mu_k * |{i:z_i = k}| + \sum_{i:z_i = k} \|x_i\| &=& 0\\
   \sum_{i:z_i = k} \|x_i\| &=& \mu_k * |{i:z_i = k}|\\
-
+  \mu_k &=& \frac{\sum_{i:z_i = k} \|x_i\|}{|{i:z_i = k}|}\\
   \end{eqnarray*}
 
-  \item (your solution)
+  That update is then performed for all $\mu_k$.
+  \item By contradiction. Let us have a set $S$ of $k$ centroids, for which there is some error, $e_k$, as defined by the optimal reconstruction error function. Let us then have another set $S'$ such that $S \subset S'$ and $|S'| = k+1$, for which there is some error, $e_{k+1}$. For the sake of contradiction, assume that $e_{k+1} > e_k$. That means that the minimum average distance from a group of points assigned to a cluster to the cluster itself increased as the number of clusters increased. However, this cannot be true, because, by construction, points are assigned to the clusters closest to them. We can see this by examining the cases for the newly added centroid:\\
+  Case 1: the centroid, $\mu_{k+1} \in S'-S$ has some points assigned to it. That means that the distance from these points to $\mu_{k+1}$ is less than the distance from these points to the centroid to which they were previously assigned. However, that means that $e_{k+1} \le e_k$, because the minimum error is either unchanged by the addition of $\mu_{k+1}$, or the minimum error is decreased, because points were reassigned to new centroids in such a way that the distance from those points to their new centroids is less. Thus, in this case, $\mu_{k+1}$ does not increase the error, and we have a contradiction with our original assumption.\\
+  Case 2: $\mu_{k+1}$ does not have some points assigned to it. In this case, the error for $\mu_{k+1}$ is 0. Error is always non-negative, because the norm squared is always non-negative, so $e_{k+1} \le e_k$. Thus, in this case, $\mu_{k+1}$ does not increase the error, and we have a contradiction with our original assumption.\\
+  In both cases, The error does not increase as k increases. $\Box$
 \end{enumerate}
 
-\section*{Problem 2}
-
+\section*{Problem 4}
 \begin{enumerate}[label=(\alph*)]
-  \item (your solution)
-  \item (your solution)
+  \item To find $w_{t+1}$, we would like to find the $w$ that minimizes $w^\top \left(\left. \nabla \text{Loss}(x,y; w)\right|_{w_t}\right) + \frac{1}{2 \eta}\| w - w_t \|^2$, and set $w_{t+1}=w$. To find a closed form, we can minimize $w_{t+1}$ with respect to $w$ by taking the derivative and setting it to be zero.
+
+  \begin{eqnarray*}
+  \frac{d}{dw}\biggl[w^\top \left(\left. \nabla \text{Loss}(x,y; w)\right|_{w_t}\right) + \frac{1}{2 \eta}\| w - w_t \|^2\biggr] &=& 0\\
+  \left. \nabla \text{Loss}(x,y; w_t)\right. + \frac{1}{\eta}(w - w_t) &=& 0\\
+  \frac{1}{\eta} (w - w_t) &=& -\left. \nabla \text{Loss}(x,y; w_t)\right.\\
+  w - w_t  &=& -\eta\left. \nabla \text{Loss}(x,y; w_t)\right.\\
+  w &=& -\eta\left. \nabla \text{Loss}(x,y; w_t)\right.+ w_t  \\
+  \end{eqnarray*}
+
+  Here, we have that to minimize $w$, we should set $w$ to be the previous $w_t$, and then take a step in the direction opposite to the gradient, to get closer to the minimum. This is the intuition behind the SGD update, which modifies the weights until they are at a stable minimum.
 \end{enumerate}
 
 \end{document}

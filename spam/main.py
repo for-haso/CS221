@@ -8,12 +8,14 @@ TRAIN_PATH_SENTIMENT = 'data/sentiment/train'
 TRAIN_PATH_TOPICS = 'data/topics/train'
 
 def evaluateClassifier(trainExamples, devExamples, classifier):
-    util.printConfusionMatrix(util.computeConfusionMatrix(trainExamples, classifier))
+    #util.printConfusionMatrix(util.computeConfusionMatrix(trainExamples, classifier))
     trainErrorRate = util.computeErrorRate(trainExamples, classifier) 
-    print 'trainErrorRate: %f' % trainErrorRate
-    util.printConfusionMatrix(util.computeConfusionMatrix(devExamples, classifier))
     devErrorRate = util.computeErrorRate(devExamples, classifier) 
+    print 'trainErrorRate: %f' % trainErrorRate 
     print 'devErrorRate: %f' % devErrorRate
+    #util.printConfusionMatrix(util.computeConfusionMatrix(devExamples, classifier))
+    
+    #print 'dev: %f' % devErrorRate
 
 def part1_1(args):
     print "Part 1.1 RuleBasedClassifier"
@@ -21,10 +23,12 @@ def part1_1(args):
     examples = util.loadExamples(TRAIN_PATH_SPAM)[:args.examples]
     labels = util.LABELS_SPAM
     trainExamples, devExamples = util.holdoutExamples(examples)
-    classifier = submission.RuleBasedClassifier( 
-            labels, util.loadBlacklist(), args.n, args.k)
+    for i in range(1, 4):
+        for j in range(10000, 40000, 10000):
+            classifier = submission.RuleBasedClassifier( 
+                    labels, util.loadBlacklist(), i, j)
 
-    evaluateClassifier(trainExamples, devExamples, classifier)
+            evaluateClassifier(trainExamples, devExamples, classifier)
 
 def part1_3(args):
     print "Part 1.3 learnWeightsFromPerceptron"
@@ -32,21 +36,23 @@ def part1_3(args):
     examples = util.loadExamples(TRAIN_PATH_SPAM)[:args.examples]
     labels = util.LABELS_SPAM
     trainExamples, devExamples = util.holdoutExamples(examples)
-    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
-    classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
+    for i in range(500, 5500, 500):
+        weights = submission.learnWeightsFromPerceptron(trainExamples[:i], submission.extractUnigramFeatures, labels, args.iters)
+        classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
 
-    evaluateClassifier(trainExamples, devExamples, classifier)
+        evaluateClassifier(trainExamples, devExamples, classifier)
 
 def part2(args):
+    print args
     print "Part 2 Sentiment Analysis"
 
     examples = util.loadExamples(TRAIN_PATH_SENTIMENT)[:args.examples]
     labels = util.LABELS_SENTIMENT
     trainExamples, devExamples = util.holdoutExamples(examples)
-    #weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
-    #classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
-    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
-    classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
+    weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractUnigramFeatures, labels, args.iters)
+    classifier = submission.WeightedClassifier(labels, submission.extractUnigramFeatures, weights)
+    #weights = submission.learnWeightsFromPerceptron(trainExamples, submission.extractBigramFeatures, labels, args.iters)
+    #classifier = submission.WeightedClassifier(labels, submission.extractBigramFeatures, weights)
 
     evaluateClassifier(trainExamples, devExamples, classifier)
 
@@ -56,7 +62,7 @@ def part3(args):
     labels = util.LABELS_TOPICS
     trainExamples, devExamples = util.holdoutExamples(examples)
 
-    classifiers = submission.learnOneVsAllClassifiers( trainExamples, submission.extractUnigramFeatures, labels, 10 )
+    classifiers = submission.learnOneVsAllClassifiers( trainExamples, submission.extractBigramFeatures, labels, 10 )
     classifier = submission.OneVsAllClassifier(labels, classifiers)
 
     evaluateClassifier(trainExamples, devExamples, classifier)

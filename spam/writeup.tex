@@ -40,7 +40,7 @@ that all of this is my own work.
 
   $\hat y = \left\{ \begin{matrix} 
 	1 ~\textrm{if}~ w \cdot \phi(x) - n \ge 0\\
-	-1 ~\textrm{if}~ w \cdot \phi(x) < 0
+	-1 ~\textrm{if}~ w \cdot \phi(x) - n< 0
 	\end{matrix}\right..$
 \end{enumerate}
 
@@ -50,21 +50,32 @@ that all of this is my own work.
   \item See code for part A.
   \item See code for part B.
 
-  \item TODO
+  \item "We have recently had a security breach of our servers. Please go to this link and enter your username and password so we can ensure that your account has not been compromised."\\
+  Each word is more or less fine, but the bigrams "please go" "this link" "enter your" "your username" "username and" "and password" are all pretty sketchy. Something like this may be classified as a server admin email (not spam) by a classifier using a unigram feature vector, but as spam by a classifier using a bigram feature vector.
   \item 
   \begin{tabular}{ l | p{3cm} | p{3cm} }
 	    \hline
 	    Num examples & trainErrorRate & devErrorRate\\ \hline
-	    500 & 0.079281 & 0.087227 \\ \hline
-	    1000 & 0.053792 & 0.067290 \\ \hline
-	    1500 & 0.039406 & 0.057321 \\ \hline
-	    2000 & 0.028147 & 0.047352 \\ \hline
-	    2500 & 0.021423 & 0.040498 \\ \hline
-	    3000 & 0.021423 & 0.039875 \\ \hline
-	    3500 & 0.015794 & 0.038629 \\ \hline
-	    4000 & 0.015481 & 0.039252 \\ \hline
-	    4500 & 0.010633 & 0.033645 \\ \hline
-	    5000 & 0.009851 & 0.038006 \\ \hline
+	    500 & 
+		0.079281 & 0.087227 \\ \hline
+		1000 & 
+		0.049257 & 0.064798 \\ \hline
+		1500 & 
+		0.041126 & 0.057944 \\ \hline
+		2000 & 
+		0.025958 & 0.041121 \\ \hline
+		2500 & 
+		0.021579 & 0.040498 \\ \hline
+		3000 & 
+		0.019234 & 0.038006 \\ \hline
+		3500 & 
+		0.016888 & 0.038629 \\ \hline
+		4000 & 
+		0.012979 & 0.037383 \\ \hline
+		4500 & 
+		0.010790 & 0.031153 \\ \hline
+		5000 & 
+		0.009226 & 0.039252 \\ \hline
 	  \end{tabular}
 \end{enumerate}
 
@@ -72,41 +83,59 @@ that all of this is my own work.
 
 \begin{enumerate}[label=(\alph*)]
   \item 
-  Unigram:
-  trainErrorRate: 0.020681
-  devErrorRate: 0.185393
-  Bigram:
-  trainErrorRate: 0.493917
-  devErrorRate: 0.505618
-
-  TODO: this is confusing
+  Unigram:\\
+  trainErrorRate: 0.032847\\
+devErrorRate: 0.168539\\
+  Bigram:\\
+  trainErrorRate: 0.000000\\
+  devErrorRate: 0.162921\\
   \item
   \begin{tabular}{ l | p{3cm} | p{3cm} }
     \hline
     Num iters & trainErrorRate & devErrorRate\\ \hline
-    1 & 0.422141 & 0.466292 \\ \hline
-    2 & 0.464720 & 0.494382 \\ \hline
-    3 & 0.126521 & 0.292135 \\ \hline
-    4 & 0.502433 & 0.511236 \\ \hline
-    5 & 0.091241 & 0.292135 \\ \hline
-    6 & 0.023114 & 0.174157 \\ \hline
-    7 & 0.492701 & 0.505618 \\ \hline
-    8 & 0.013382 & 0.157303 \\ \hline
-    9 & 0.069343 & 0.207865 \\ \hline
-    10 & 0.008516 & 0.162921 \\ \hline
-    11 & 0.006083 & 0.179775 \\ \hline
-    12 & 0.029197 & 0.235955 \\ \hline
-    13 & 0.013382 & 0.151685 \\ \hline
-    14 & 0.004866 & 0.191011 \\ \hline
-    15 & 0.013382 & 0.174157 \\ \hline
-    16 & 0.006083 & 0.168539 \\ \hline
-    17 & 0.004866 & 0.140449 \\ \hline
-    18 & 0.009732 & 0.157303 \\ \hline
-    19 & 0.003650 & 0.146067 \\ \hline
-    20 & 0.493917 & 0.505618 \\ \hline
+1 & 
+0.291971 & 0.365169 \\ \hline
+2 & 
+0.453771 & 0.483146 \\ \hline
+3 & 
+0.142336 & 0.292135 \\ \hline
+4 & 
+0.502433 & 0.511236 \\ \hline
+5 & 
+0.049878 & 0.162921 \\ \hline
+6 & 
+0.479319 & 0.505618 \\ \hline
+7 & 
+0.150852 & 0.370787 \\ \hline
+8 & 
+0.019465 & 0.162921 \\ \hline
+9 & 
+0.029197 & 0.157303 \\ \hline
+10 & 
+0.014599 & 0.146067 \\ \hline
+11 & 
+0.104623 & 0.308989 \\ \hline
+12 & 
+0.008516 & 0.168539 \\ \hline
+13 & 
+0.038929 & 0.252809 \\ \hline
+14 & 
+0.017032 & 0.196629 \\ \hline
+15 & 
+0.008516 & 0.179775 \\ \hline
+16 & 
+0.004866 & 0.179775 \\ \hline
+17 & 
+0.000000 & 0.162921 \\ \hline
+18 & 
+0.000000 & 0.162921 \\ \hline
+19 & 
+0.000000 & 0.162921 \\ \hline
+20 & 
+0.000000 & 0.162921 \\ \hline
   \end{tabular}
 
-    Dev error rate does increase monotonically with training error rate. This makes sense because, as the training error rate decreases, the model ends up fitting the training data. If the training data is similar to the dev data, and the model has not been over-fitted to the training data, the dev error rate should decrease as well. If the model has been over-fitted to the training data (which we do not see here), we would see the dev error rate start to increase as the training error rate gets really small. 
+    Dev error rate does more or less increase monotonically with training error rate. This makes sense because, as the training error rate decreases, the model ends up fitting the training data. If the training data is similar to the dev data, and the model has not been over-fitted to the training data, the dev error rate should decrease as well. If the model has been over-fitted to the training data (which we do not see here), we would see the dev error rate start to increase as the training error rate gets really small. 
 
 \end{enumerate}
 
@@ -116,13 +145,21 @@ that all of this is my own work.
   \item See code for part A.
 
   \item 
+	Unigram:\\
+	trainErrorRate: 0.003909\\
+devErrorRate: 0.120249\\
   Bigram:\\
   trainErrorRate: 0.000000\\
-	devErrorRate: 0.105919\\
-	Unigram:\\
-	trainErrorRate: 0.008444\\
-	devErrorRate: 0.128349
-\item TODO
+devErrorRate: 0.100935\\
+\item To find the gradients with respect to $w_1, w_2, ..., w_k$, we want to take the gradient of the loss function with respect to both $w_t$ and $w_y$. 
+
+\begin{eqnarray*}
+\frac{\partial}{\partial w_t} \biggl[\mathbb{I}(y \neq t) + w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x) \biggr] &=& \phi(x)\\
+\frac{\partial}{\partial w_y} \biggl[\mathbb{I}(y \neq t) + w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x) \biggr] &=& -\phi(x)\\
+\end{eqnarray*}
+
+For all $t \ne y$, we get that the subgradient is just $\phi(x)$, because we don't have to take the partial derivative w.r.t. $w_y$. However, when $t = y$, the subgradient becomes $\frac{\partial}{\partial w_t} + \frac{\partial}{\partial w_y}$, meaning the subgradient is $0$.
+
 \end{enumerate}
 
 \end{document}
