@@ -137,7 +137,6 @@ def learnWeightsFromPerceptron(trainExamples, featureExtractor, labels, iters = 
     feature_vectors = [None] * len(trainExamples)
     for i in range(0, iters):
         for i, train in enumerate(trainExamples):
-            # TODO memoize for speed up
             if feature_vectors[i] == None:
                 feature_vectors[i] = featureExtractor(train[0])
             features = feature_vectors[i]
@@ -249,6 +248,7 @@ def learnOneVsAllClassifiers( trainExamples, featureFunction, labels, perClassif
     classifiers = list()
     for label in labels:
         weights = learnWeightsFromPerceptron(trainExamples, featureFunction, (label, ""), perClassifierIters)
+        print weights
         classifier = WeightedClassifier((label, ""), featureFunction, weights)
         classifiers.append((label, classifier))
     return classifiers

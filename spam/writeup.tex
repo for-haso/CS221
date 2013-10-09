@@ -41,7 +41,7 @@ that all of this is my own work.
   $\hat y = \left\{ \begin{matrix} 
 	1 ~\textrm{if}~ w \cdot \phi(x) - n \ge 0\\
 	-1 ~\textrm{if}~ w \cdot \phi(x) - n< 0
-	\end{matrix}\right..$
+	\end{matrix}\right.$
 \end{enumerate}
 
 \section*{Problem 1.3}
@@ -151,15 +151,32 @@ devErrorRate: 0.120249\\
   Bigram:\\
   trainErrorRate: 0.000000\\
 devErrorRate: 0.100935\\
-\item To find the gradients with respect to $w_1, w_2, ..., w_k$, we want to take the gradient of the loss function with respect to both $w_t$ and $w_y$. 
-
+\item $\hat y = \mathrm{Loss}(x, y, w) = \max_{t \in \mathcal{Y}}( \mathbb{I}(y \neq t) + w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x))$
+\\
+\begin{eqnarray*}
+\hat y = \mathrm{Loss}(x, y, w) &=& \max_{t \in \mathcal{Y}}( \mathbb{I}(y \neq t) + w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x))\\
+&=& \left\{ \begin{matrix} 
+	0 + w_y \cdot \phi(x) - w_y \cdot \phi(x) ~\textrm{:}~ t = y\\
+	1 + w_t \cdot \phi(x) - w_y \cdot \phi(x) ~\textrm{:}~ t \ne y
+	\end{matrix}\right.\\
+&=& \left\{ \begin{matrix} 
+0 ~\textrm{:}~ t = y\\
+1 + w_t \cdot \phi(x) - w_y \cdot \phi(x) ~\textrm{:}~ t \ne y
+\end{matrix}\right.\\
+\end{eqnarray*}
+To find the gradients with respect to $w_1, w_2, ..., w_k$, we want to take the gradient of the loss function with respect to both $w_t$ and $w_y$.
 \begin{eqnarray*}
 \frac{\partial}{\partial w_t} \biggl[\mathbb{I}(y \neq t) + w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x) \biggr] &=& \phi(x)\\
 \frac{\partial}{\partial w_y} \biggl[\mathbb{I}(y \neq t) + w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x) \biggr] &=& -\phi(x)\\
 \end{eqnarray*}
 
-For all $t \ne y$, we get that the subgradient is just $\phi(x)$, because we don't have to take the partial derivative w.r.t. $w_y$. However, when $t = y$, the subgradient becomes $\frac{\partial}{\partial w_t} + \frac{\partial}{\partial w_y}$, meaning the subgradient is $0$.
-
+We are trying to find the gradient with respect to $w_t$, but to do so, we must look at the result of the loss function. That is to say, we must compare our calculated $\hat y$ to the true $y$ and use that to help us determine the final gradient.\\
+\textbf{Case 1:} $\hat y = y$:\\
+There are two subcases in this case.\\
+\textbf{Case 1.1:} $w_{y} \cdot \phi(x) - w_{t} \cdot \phi(x) \ge 1$. In this case, we are correct above the desired margin, so we do not have to update the weight vector. Therefore, the loss function will be 0 for all $w_t$, so the subgradient for any $w_t$ is 0.\\
+\textbf{Case 1.2:} $w_{y} \cdot \phi(x) - w_{t} \cdot \phi(x) < 1$. In this case, we are correct, but our margin is too small, so we still must update the weight vector. In this case, the loss function is going to be $w_{t} \cdot \phi(x) - w_{y} \cdot \phi(x)$. Because of the max function, we know that the outcome of the loss function is going to only be in terms of $w_{t=\hat y} = w_{\hat y}$ and $w_y$. Therefore, the subgradient with respect to all $w_t$ where $t \ne \hat y$ and $t \ne y$ is 0. When we take the gradient with respect to $w_{\hat y}$, we find that the subgradient is $\phi(x)$, and when we take the gradient with respect to $w_y$, we find that the subgradient is $-\phi(x)$.\\
+\textbf{Case 2:} $\hat y \ne y$:\\
+In this case, we know that we must update the weight vector, because our result is incorrect, so the loss function is not 0. Therefore, we have the same result for the subgradients as in \textbf{case 1.2}.\\
 \end{enumerate}
 
 \end{document}
