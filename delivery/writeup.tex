@@ -1,0 +1,39 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx}
+
+\begin{document}
+
+\begin{center}
+{\Large CS221 Fall 2013 Homework [number]}
+
+\begin{tabular}{rl}
+SUNet ID: & nisham \\
+Name: & Nisha Masharani \\
+Collaborators: & [list all the people you worked with]
+\end{tabular}
+\end{center}
+
+By turning in this assignment, I agree by the Stanford honor code and declare
+that all of this is my own work.
+
+\section*{Problem 1}
+
+\begin{enumerate}[label=(\alph*)]
+  \item See code.
+  \item See code.
+  \item state = (location, packages_held, num_packages_picked_up)\\
+  start = (start_loc, {}, 0)\\
+  goal = (same as start, {}, k)\\
+  actions = move north, south, east, west (change loc), pick up package (packages held added new package, increment num_packages_picked_up; only available at P_i), drop off package (package removed; only available at D_i if package picked up)\\
+  costs = move: 1 + size(package_set); pick up/drop off = 0
+  \\ For P_i and D_i, need to store bool to indicate package vs. not package (true = has package, false = not has package)
+\end{enumerate}
+
+\section*{Problem 2}
+
+\begin{enumerate}[label=(\alph*)]
+  \item (your solution)
+  \item (your solution)
+\end{enumerate}
+
+\end{document}

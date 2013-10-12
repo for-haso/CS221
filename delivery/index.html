@@ -1,0 +1,150 @@
+<head>
+  <script src="plugins/main.js"></script>
+  <title>Package delivery [delivery]</title>
+  <link rel="stylesheet" type="text/css" href="plugins/main.css"/>
+</head>
+
+<body onload="onLoad('Huimin Li')">
+
+<!-- This div will be populated automatically -->
+<div id="assignmentHeader"></div>
+
+<img src="delivery-truck.jpg"/>
+
+<p>
+Package delivery companies such as UPS and FedEx route millions of packages
+every day using thousands of vehicles.
+How do they decide which package to load, where and when?  This is a
+complex problem with all sorts of constraints such as time, cost and capacity. In this assignment, imagine yourself as the owner of a newly started delivery business. To improve efficiency, you need to build a simple delivery planner.
+</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 1: laying the groundwork</div>
+
+<p>
+Before you start deliverying packages, you want to get familar with the basic search
+algorithms so that you don't have to worry about those details later on.
+</p>
+
+<ol class="problem">
+
+<li class="code">
+We have already implemented uniform cost search (UCS) for you. Take a look at the code(see <code>util.py</code>) to familiarize with the
+algorithm, and try running it on the trivial test case
+(<code>util.trivialProblem</code> in <code>util.py</code>):
+<pre>
+import util
+ucs = util.UniformCostSearch(verbose=3)
+ucs.solve(util.trivialProblem)
+</pre>
+This should print out a trace of what the algorithm is doing.
+Experiment with different graphs and look at the output to get an intuition for the algorithm.
+Note that UCS might explore many more states than the number of states along
+the optimal path. Let's try to quantify this: <b>fill out <code>createUCSTestCase(n)</code> in <code>submission.py</code></b>. The function takes an integer $n$ as input, and returns a search
+problem on which UCS explores at least $n$ states whereas the
+optimal path only takes at most two actions.
+</li>
+
+<li class="code">
+Aware of such inefficiency, now we will do A*.
+Recall from class that you can implement A* by the sneaky trick: take
+a problem $P$
+and reduce it to another problem $Q$, such that running A*
+on $P$ is the same as running UCS on $Q$. <b>Fill out <code>astarReduction(problem, heuristic)</code> in <code>submission.py</code></b>.
+Note that UCS, who is doing all the hard work, has no idea that it's actually running A*!
+</li>
+
+<li class="writeup">
+Let's try to construct a search problem where A* does much much better than
+UCS (extreme examples really can help us understand the value of a method).
+Suppose your start state is the zero vector $(0,\dots,0)$ of dimension $n$.
+Define a search problem (actions, successors, costs, goal test)
+and a heuristic
+such that the number of states visited by UCS is exponential (at least $\Omega(2^n)$)
+whereas the number of states visited by A* is linear (at most $O(n)$).
+You don't have to code this up, but you should describe your construction with
+mathematical precision.
+</li>
+
+</ol>
+
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 2: package delivery</div>
+
+<p>
+Now you can build a package delivery planner by applying the algorithms you developed. Let's treat those algorithms as black boxes and focus on <i>modeling</i>.
+</p>
+
+<p>
+You will deliver packages in the following scenario: the city you live in can be viewed as a $m \times n$ grid, where each cell is either free ('.') or
+occupied by a building ('#'). As you just started, you have only one truck ('T'). You have $k$ orders, where the
+$i$-th order has a pickup location ('Pi') and a dropoff location ('Di').
+Here's an example of a scenario:
+<pre>
+D0 .  .  .  .  T
+.  #  #  P1 .  .
+.  .  #  #  .  .
+P0 .  .  .  .  D1
+</pre>
+There are 6 actions in total: you can drive the truck around (<b>moving
+north, south, east, or west</b>), <b>pick up</b> or <b>drop off</b> packages. Finally, you must return to your starting location(make sure you don't crash into any building during the whole process!).
+When you enter Pi, you can choose to pick up the $i$-th package if it hasn't
+been picked up. When you
+enter Di, you can choose to drop off the $i$-th package if you have picked it up.
+Moving from one cell to an adjacent cell costs 1 plus <i>the number of packages that are being carried</i>.
+You want to get all packages delivered and return to starting location, with minimal total cost.
+</p>
+
+<ol class="problem">
+
+<li class="writeup">
+Formalize the problem as a search problem, that is, what
+are the states, actions, costs, initial state, and goal test?  Try to find a
+minimal representation of the states.  In addition, how many states are there in your search problem? (express your answer as a function of $m$, $n$, and $k$, also include a brief explanantion)
+</li>
+
+<li class="code">
+Implement the search problem you described by <b>filling out <code>DeliveryProblem</code> in
+<code>submission.py</code></b>.
+You can run uniform cost search on it to solve the sample delivery problems in <code>util.py</code>.
+If your code is correct, you should be able to run the following:
+<pre>
+import util, submission
+ucs = util.UniformCostSearch(verbose=1)
+scenario = util.deliveryScenario1
+ucs.solve(submission.DeliveryProblem(scenario))
+scenario.simulate(ucs.actions, True)  # Visualize the solution
+print ucs.numStatesExplored, 'number of states explored.'
+</li>
+
+<li class="both">
+Now you have delivered some packages, it's time to make the search faster (at
+least in theory).
+Let's consider consistent heuristics which correspond to solving a relaxed problem.
+The first relaxation is assuming that you can drive through buildings(Passwall spell!) and not deliver any packages, but
+you still have to go back to starting position.
+<b>Implement <code>createHeuristic1(scenario)</code> in
+<code>submission.py</code></b> by using such relaxation.
+(Remember a heuristic function takes a state, and returns an <i>estimate</i> of the minimum cost from this state to the goal state)<br>
+In addition, run A* with your heuristic in <code>util.deliveryScenario1</code>,  write down how many states were explored in your writeup.
+</li>
+
+<li class="both">
+You were perhaps a bit too relaxed, so in this relaxed problem, let's suppose you have to deliver some
+given <code>package</code>, and after that you have to go back to starting position - but you can still drive through buildings.
+<b>Implement <code>createHeuristic2(scenario, package)</code> in
+<code>submission.py</code></b> by using such relaxation.
+<br>
+In addition, run A* with your heuristic in <code>util.deliveryScenario2</code>,  write down how many states were explored in your writeup.
+</li>
+
+<li class="both">
+In this final relaxation, each time you will deliver the most costly package (recall that the maximum over consistent heuristics is still a consistent heuristic), you can still drive through buildings.
+<b>Implement <code>createHeuristic3(scenario)</code> in
+<code>submission.py</code></b> by using such relaxation.
+<br>In addition, run A* with your heuristic in <code>util.deliveryScenario3</code>,  write down how many states were explored in your writeup.
+</li>
+
+</ol>
+</body>
