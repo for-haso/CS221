@@ -89,17 +89,17 @@ class DeliveryProblem(util.SearchProblem):
     # |scenario|: delivery specification.
     def __init__(self, scenario):
         self.scenario = scenario
-    # state: tuple containing (location, num packages delivered, packages held)
+    # state: tuple containing (location, packages delivered, packages held)
     # Return the start state.
     def startState(self):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
-        return (self.scenario.truckLocation, 0, ())
+        return (self.scenario.truckLocation, (), ())
         # END_YOUR_CODE
 
     # Return whether |state| is a goal state or not.
     def isGoal(self, state):
         # BEGIN_YOUR_CODE (around 2 lines of code expected)
-        if state == (self.scenario.truckLocation, self.scenario.numPackages, ()):
+        if state == (self.scenario.truckLocation, tuple(range(self.scenario.numPackages)), ()):
             return True
         return False
         # END_YOUR_CODE
@@ -128,7 +128,10 @@ class DeliveryProblem(util.SearchProblem):
             if package in state[2]:
                 packages = list(state[2])
                 packages.remove(package)
-                succ = ("Dropoff", (state[0], state[1] + 1, tuple(packages)), 0)
+                dropped = list(state[1])
+                dropped.append(package)
+                dropped.sort()
+                succ = ("Dropoff", (state[0], tuple(dropped), tuple(packages)), 0)
                 succs.append(succ)
         # check neighbors for moves -> cost = 1 + size(package_set)
         for neighbor in neighbors:
@@ -160,17 +163,34 @@ def createHeuristic1(scenario):
 # Return a heuristic corresponding to solving a relaxed problem
 # where you can ignore all barriers, but
 # you'll need to deliver the given |package|, and then go home
+
+def euclidianDist(loc1, loc2):
+    return math.sqrt((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)
+
 def createHeuristic2(scenario, package):
     def heuristic(state):
         # BEGIN_YOUR_CODE (around 11 lines of code expected)
-        dist = 0.0
+        cost = 0.0
         loc = state[0]
-        delivery_loc = scenario.dropoffLocations[package]
-        dist += math.sqrt((loc[0] - delivery_loc[0]) ** 2 + (loc[1] - delivery_loc[1]) ** 2)
-        loc = delivery_loc
         home = scenario.truckLocation
-        dist += math.sqrt((home[0] - loc[0])**2 + (home[1] - loc[1])**2)
-        return dist * (1 + len(state[2]) - 1)
+        num_packages = len(state[2])
+        # case 3: dropped off target package
+        if package in state[1]:
+            # distance from loc to home
+            return euclidianDist(loc, home) * (1 + num_packages)
+        if package not in state[2]:
+            # go pickup package
+            pickup_loc = scenario.pickupLocations[package]
+            cost += euclidianDist(loc, pickup_loc) * (1 + num_packages)
+            num_packages += 1
+            loc = pickup_loc
+        # case 2: haven't dropped off target package
+        # go drop off package
+        delivery_loc = scenario.dropoffLocations[package]
+        cost += euclidianDist(loc, delivery_loc) * (1 + num_packages)
+        # go home
+        cost += euclidianDist(delivery_loc, home) * (num_packages)
+        return cost
         # END_YOUR_CODE
     return heuristic
 
@@ -184,5 +204,12 @@ def createHeuristic2(scenario, package):
 # createHeuristic2.
 def createHeuristic3(scenario):
     # BEGIN_YOUR_CODE (around 5 lines of code expected)
-    raise Exception("Not implemented yet")
+    def heuristic(state):
+        max_heuristic = 0.0
+        for package in range(scenario.numPackages):
+            heuristic2 = createHeuristic2(scenario, package)(state)
+            if heuristic2 > max_heuristic:
+                max_heuristic = heuristic2
+        return max_heuristic
+    return heuristic
     # END_YOUR_CODE
