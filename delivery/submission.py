@@ -111,7 +111,6 @@ class DeliveryProblem(util.SearchProblem):
         # at that location. In order for the simulation code to work, please use
         # the exact strings 'Pickup' and 'Dropoff' for those two actions.
         # BEGIN_YOUR_CODE (around 18 lines of code expected)
-        # raise Exception("Not implemented yet")
         # check cur location for pickup/dropoff -> cost = 0
         succs = list()
         # Return a list of valid (action, newLoc) pairs that we can take from loc.
@@ -123,6 +122,7 @@ class DeliveryProblem(util.SearchProblem):
                 packages.append(package)
                 succ = ("Pickup", (state[0], state[1], tuple(packages)), 0)
                 succs.append(succ)
+
         elif state[0] in self.scenario.dropoffLocations:
             package = self.scenario.dropoffLocations.index(state[0])
             if package in state[2]:
@@ -150,10 +150,7 @@ class DeliveryProblem(util.SearchProblem):
 def createHeuristic1(scenario):
     def heuristic(state):
         # BEGIN_YOUR_CODE (around 2 lines of code expected)
-        home = scenario.truckLocation
-        loc = state[0]
-        dist = math.sqrt((home[0] - loc[0])**2 + (home[1] - loc[1])**2)
-        return dist * (1 + len(state[2]))
+        return distance(scenario.truckLocation, state[0])
         # END_YOUR_CODE
     return heuristic
 
@@ -164,8 +161,8 @@ def createHeuristic1(scenario):
 # where you can ignore all barriers, but
 # you'll need to deliver the given |package|, and then go home
 
-def euclidianDist(loc1, loc2):
-    return math.sqrt((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)
+def distance(loc1, loc2):
+    return math.fabs(loc1[0] - loc2[0]) + math.fabs(loc1[1] - loc2[1])
 
 def createHeuristic2(scenario, package):
     def heuristic(state):
@@ -177,19 +174,19 @@ def createHeuristic2(scenario, package):
         # case 3: dropped off target package
         if package in state[1]:
             # distance from loc to home
-            return euclidianDist(loc, home) * (1 + num_packages)
+            return distance(loc, home)
         if package not in state[2]:
             # go pickup package
             pickup_loc = scenario.pickupLocations[package]
-            cost += euclidianDist(loc, pickup_loc) * (1 + num_packages)
+            cost += distance(loc, pickup_loc)
             num_packages += 1
             loc = pickup_loc
         # case 2: haven't dropped off target package
         # go drop off package
         delivery_loc = scenario.dropoffLocations[package]
-        cost += euclidianDist(loc, delivery_loc) * (1 + num_packages)
+        cost += distance(loc, delivery_loc) * 2
         # go home
-        cost += euclidianDist(delivery_loc, home) * (num_packages)
+        cost += distance(delivery_loc, home)
         return cost
         # END_YOUR_CODE
     return heuristic

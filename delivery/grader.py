@@ -59,6 +59,7 @@ def testHeuristic1():
         return
     # This is a coarse check, report your exact number of explored nodes in writeup
     if algorithm.numStatesExplored >= 61:
+        print algorithm.numStatesExplored
         grader.fail("heuristic1 explores too many states")
         return
     grader.assignFullCredit()
@@ -93,6 +94,7 @@ def testHeuristic3():
     algorithm = submission.AStarSearch(submission.createHeuristic3(scenario))
     algorithm.solve(problem)
     if algorithm.totalCost != 27:
+        print algorithm.totalCost
         grader.fail("heuristic2 produces wrong total cost")
         return
     # This is a coarse check, report your exact number of explored nodes in writeup
