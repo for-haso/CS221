@@ -1,0 +1,84 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx}
+
+\begin{document}
+
+\begin{center}
+{\Large CS221 Fall 2013 Homework 3: wordseg}
+
+\begin{tabular}{rl}
+SUNet ID: & nisham \\
+Name: & Nisha Masharani \\
+Collaborators: & [list all the people you worked with]
+\end{tabular}
+\end{center}
+
+By turning in this assignment, I agree by the Stanford honor code and declare
+that all of this is my own work.
+
+\section*{Problem 1}
+
+\begin{enumerate}[label=(\alph*)]
+  \item From the given, we know that $\text{Cost}(w_n, w_{n+1}) = \ell(w_1, w_2, \ldots, w_n) + \ell(w_2, w_3, \ldots, w_n, w_{n+1})$. Thus, $\text{Cost}(w_1, ..., w_{n+1}) = \ell([\text{begin tokens}], w_1) + \ell([\text{begin tokens}], w_1, w_2) + ... + \ell(w_1, w_2, \ldots, w_n) + \ell(w_2, w_3, \ldots, w_n, w_{n+1})$. Since $\ell$ is an any arbitrary cost function, we can use that same additive principle with the unigram and bigram cost functions:\\
+  Unigram:\\
+  \begin{eqnarray*}
+  \text{Cost}(w_1, w_2, ..., w_n) &=& u(w_1) + u(w_2) + ... + u(w_n)\\
+  &=& \sum_{i=1}^{n} u(w_i)\\
+  \end{eqnarray*}
+  Bigram:\\
+  \begin{eqnarray*}
+  \text{Cost}(w_1, w_2, ..., w_n) &=& b(\text{-BEGIN-}, w_1) + b(w_1, w_2) + ... + b(w_{n-1}, w_n)\\
+  &=& \sum_{i=1}^{n} b(w_{i-1}, w_i)\\
+  \end{eqnarray*}
+  where $w_0 =$ -BEGIN-.
+  \item Let str be the input string containing words without whitespace, and let sentence be the reconstructed sentence so far.\\
+  \begin{verbatim}
+  while str_length > 0, define two variables min_index and min_cost.
+  	  for index = 1 to str_length, let our word = str[0:index]
+  	      if the Cost(word) < min_cost, let min_index = index and 
+  	      min_cost = Cost(word).
+  	  After the for loop has completed, let sentence = sentence + 
+  	  str[0:min_index] and let str = str[max_index:] .
+  Once str_length <= 0, return the constructed sentence.
+  \end{verbatim}
+  Let n be the length of the input string. Iterating through the input string (for loop) takes $O(n)$, and waiting until the string is empty takes at most $O(n)$, so the running time is $O(n^2)$ assuming the Cost function and substring take constant time. This assumption is reasonable because cost is probably stored in a hashtable or similar data structure instead of being calculated upon request, and substring usually does not create a new copy of the substring.
+
+  \item Let the query be "ilikedesertsanddunes". Let the cost function be a unigram cost function as follows:
+  \begin{eqnarray*}
+  b(\text{-BEGIN-}, \text{i}) &=& 1.0\\
+  b(\text{i}, \text{like}) &=& 1.0\\
+  b(\text{like}, \text{deserts}) &=& 1.0\\
+  b(\text{like}, \text{desert}) &=& 3.0\\
+  b(\text{desert}, \text{sand}) &=& 1.0\\
+  b(\text{deserts}, \text{and}) &=& 2.0\\
+  b(\text{sand}, \text{dunes}) &=& 1.0\\
+  b(\text{and}, \text{dunes}) &=& 3.0\\
+  \end{eqnarray*}
+  The total cost of "i like deserts and dunes" is $1.0 + 1.0 + 1.0 + 2.0 + 3.0 = 8.0$, while the total cost of "i like desert sand dunes" is $1.0 + 1.0 + 3.0 + 1.0 + 1.0 = 7.0$, making it the better sentence. However, the greedy algorithm will choose "i like deserts and dunes", because it will automatically choose "like deserts" over "like desert" because the immediate cost is lower. 
+\end{enumerate}
+
+\section*{Problem 2}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Let words be the input array containing words without vowels, and let sentence be the reconstructed sentence so far.\\
+  \begin{verbatim}
+  for word in words, define two variables min_word and min_cost.
+  	  for filled_word in possibleFills(word):
+  	      if the Cost(filled_word) < min_cost, let min_word = filled_word and 
+  	      min_cost = Cost(word).
+  	  After the for loop has completed, let sentence = sentence + min_word.
+  Return the constructed sentence.
+  \end{verbatim}
+  Let m be the number of elements in words, and let k be the number of elements in possibleFills(word). For each iteration in words, we are doing k iterations through possibleFills(word), so the total number of iterations is $O(km)$. All operations in the iterations are constant time, so $O(km)$ is also the running time of this algorithm.
+  \item Let our sentence be "the grape ripened". Without vowels, this becomes "th grp rpnd". Let our bigram cost function be defined as follows:
+  \begin{eqnarray*}
+  b(\text{-BEGIN-}, \text{the}) &=& 1.0\\
+  b(\text{the}, \text{group}) &=& 1.0\\
+  b(\text{the}, \text{grape}) &=& 2.0\\
+  b(\text{group}, \text{ripened}) &=& 3.0\\
+  b(\text{grape}, \text{ripened}) &=& 1.0\\
+  \end{eqnarray*}
+  In this case, the total cost of "the grape ripened" is $1.0 + 2.0 + 1.0 = 4.0$, while the cost of "the group ripened" is $1.0 + 1.0 + 3.0 = 5.0$. However, the greedy algorithm will only find "the group ripened" as a solution, because it will dismiss "the grape" as too costly.
+\end{enumerate}
+
+\end{document}

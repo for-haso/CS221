@@ -117,13 +117,13 @@ class DeliveryProblem(util.SearchProblem):
         neighbors = self.scenario.getNeighbors(state[0])
         if state[0] in self.scenario.pickupLocations:
             package = self.scenario.pickupLocations.index(state[0])
-            if package not in state[2]:
+            if package not in state[2] and package not in state[1]:
                 packages = list(state[2])
                 packages.append(package)
                 succ = ("Pickup", (state[0], state[1], tuple(packages)), 0)
                 succs.append(succ)
 
-        elif state[0] in self.scenario.dropoffLocations:
+        if state[0] in self.scenario.dropoffLocations:
             package = self.scenario.dropoffLocations.index(state[0])
             if package in state[2]:
                 packages = list(state[2])
@@ -140,6 +140,10 @@ class DeliveryProblem(util.SearchProblem):
         return succs
         # END_YOUR_CODE
 
+
+def distance(loc1, loc2):
+    return abs(loc1[0] - loc2[0]) + abs(loc1[1] - loc2[1])
+    
 ############################################################
 # Problem 2c: heuristic 1
 
@@ -160,9 +164,6 @@ def createHeuristic1(scenario):
 # Return a heuristic corresponding to solving a relaxed problem
 # where you can ignore all barriers, but
 # you'll need to deliver the given |package|, and then go home
-
-def distance(loc1, loc2):
-    return math.fabs(loc1[0] - loc2[0]) + math.fabs(loc1[1] - loc2[1])
 
 def createHeuristic2(scenario, package):
     def heuristic(state):
@@ -210,3 +211,59 @@ def createHeuristic3(scenario):
         return max_heuristic
     return heuristic
     # END_YOUR_CODE
+
+
+"""# TODO: remove
+class BitProblem(util.SearchProblem):
+    # |scenario|: delivery specification.
+    def __init__(self):
+        return
+    # state: tuple containing (location, packages delivered, packages held)
+    # Return the start state.
+    def startState(self):
+        # BEGIN_YOUR_CODE (around 1 line of code expected)
+        return "0000000"
+        # END_YOUR_CODE
+
+    # Return whether |state| is a goal state or not.
+    def isGoal(self, state):
+        # BEGIN_YOUR_CODE (around 2 lines of code expected)
+        if state == "1111111":
+            return True
+        return False
+        # END_YOUR_CODE
+
+    # Return a list of (action, newState, cost) tuples corresponding to edges
+    # coming out of |state|.
+    def succAndCost(self, state):
+        print state
+        # Hint: Call self.scenario.getNeighbors((x,y)) to get the valid neighbors
+        # at that location. In order for the simulation code to work, please use
+        # the exact strings 'Pickup' and 'Dropoff' for those two actions.
+        # BEGIN_YOUR_CODE (around 18 lines of code expected)
+        # check cur location for pickup/dropoff -> cost = 0
+        succs = list()
+        for i in range(len(state)):
+            bit = state[i]
+            if bit == 1:
+                bit = 0
+            else:
+                bit = 1
+            succs.append((i, state[:i] + str(bit) + state[i+1:], 1))
+        return succs
+        # END_YOUR_CODE
+
+def createHeuristic4():
+    # BEGIN_YOUR_CODE (around 5 lines of code expected)
+    def heuristic(state):
+        count = 1
+        for i in range(len(state)):
+            if state[i] == '0':
+                count += 1
+        return count ** 2
+    return heuristic
+
+problem = BitProblem()
+algorithm = AStarSearch(createHeuristic4())
+algorithm.solve(problem)
+print algorithm.numStatesExplored"""

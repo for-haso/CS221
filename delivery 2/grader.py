@@ -45,6 +45,7 @@ def testDelivery():
 grader.addBasicPart('2b-0', testDelivery)
 
 
+
 ############################################################
 # Problem 2c
 
@@ -61,9 +62,8 @@ def testHeuristic1():
         grader.fail("heuristic1 explores too many states")
         return
     grader.assignFullCredit()
-    print "numStatesExplored: ", algorithm.numStatesExplored
-    print "totalCost: ", algorithm.totalCost
 grader.addBasicPart('2c-0', testHeuristic1)
+
 
 ############################################################
 # Problem 2d
@@ -81,8 +81,6 @@ def testHeuristic2():
         grader.fail("heuristic2 explores too many states")
         return
     grader.assignFullCredit()
-    print "numStatesExplored: ", algorithm.numStatesExplored
-    print "totalCost: ", algorithm.totalCost
 grader.addBasicPart('2d-0', testHeuristic2)
 
 
@@ -102,8 +100,7 @@ def testHeuristic3():
         grader.fail("heuristic3 explores too many states")
         return
     grader.assignFullCredit()
-    print "numStatesExplored: ", algorithm.numStatesExplored
-    print "totalCost: ", algorithm.totalCost
 grader.addBasicPart('2e-0', testHeuristic3, 1)
+
 
 grader.grade()

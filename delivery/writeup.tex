@@ -4,7 +4,7 @@
 \begin{document}
 
 \begin{center}
-{\Large CS221 Fall 2013 Homework [number]}
+{\Large CS221 Fall 2013 Homework 3: delivery}
 
 \begin{tabular}{rl}
 SUNet ID: & nisham \\
@@ -21,19 +21,28 @@ that all of this is my own work.
 \begin{enumerate}[label=(\alph*)]
   \item See code.
   \item See code.
-  \item state = (location, packages_held, num_packages_picked_up)\\
-  start = (start_loc, {}, 0)\\
-  goal = (same as start, {}, k)\\
-  actions = move north, south, east, west (change loc), pick up package (packages held added new package, increment num_packages_picked_up; only available at P_i), drop off package (package removed; only available at D_i if package picked up)\\
-  costs = move: 1 + size(package_set); pick up/drop off = 0
-  \\ For P_i and D_i, need to store bool to indicate package vs. not package (true = has package, false = not has package)
+  \item For the number of states visited by UCS to be $\Omega(2^n)$, we need the number of states to be $\ge 2^n$. An easy way to generate $2^n$ possible states is to say that each element in the vector is a bit, which can take on values of 0 or 1 only.\\
+  \textbf{Actions:} For each state, there are n actions that can be taken. The ith action is flipping the ith bit.\\
+  \textbf{Cost:} The cost of a bit flip is 1.\\
+  \textbf{Successors:} For each state, the successor states are all bit vectors that are a hamming distance of 1 away from the state.\\
+  \textbf{Goal:} The goal state is a bit vector where all bits are one.\\
+  For UCS, this will run in $\Omega(2^n)$ time, because there are $2^n-1$ states that are not a bit vector with all 1s, and to get to the bit vector will all 1s, the rest of them will have to be explored, because they are all of lower cost. However, with a heuristic that makes the cost of flipping a bit from a 1 to a 0 to be 2, instad of 1, the algorithm will only explore three states, because it is so much less expensive to explore states that switch bits from 0 to 1 instead of from 1 to 0.\\
+  For A*, let us use the following heuristic: $h(s) = (1 + \text{the number of 0s in s})^2$. In this case, the number of states explored is always $n+1$, which is $O(n)$.
 \end{enumerate}
 
 \section*{Problem 2}
 
 \begin{enumerate}[label=(\alph*)]
-  \item (your solution)
-  \item (your solution)
+  \item A state is a tuple containing the current location, a sorted list of the packages delivered, and a list of the packages currently being carried by the truck.\\
+  There are 6 possible actions: move north, move south, move east, move west, pickup a package, and deliver a package. Movements can only happen as long as there isn't an obstacle in the way, pickup can only happen if the truck does not have the package and the package has not been delivered, and dropoff can only happen if the truck has the package.\\
+  Costs for pickup and dropoff are zero, because we want to make sure that all packages are picked up and dropped off at pickup/dropoff locations, so we need the cost to be 0 to guarantee that. Costs for movements are 1 + the number of packages currently being carried (the length of the list stored in the state).\\
+  The initial state is a truck at the home location holding no packages and having delivered no packages.\\
+  The goal state is a truck at the home location holding no packages and having delivered all packages (the list of packages delivered will be a sorted list containing the numbers from 1 to k).\\
+  There are $2^k$ possible lists of packages currently being carried by the truck, and $2^k$ possible lists of packages delivered by the truck. There are $mn$ locations on the grid. Therefore, there are $mn2^k2^k = mn2^{2k}$ different states.
+  \item See code.
+  \item Number of states explored = 56
+  \item Number of states explored = 34
+  \item Number of states explored = 56
 \end{enumerate}
 
 \end{document}
