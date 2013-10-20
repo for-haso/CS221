@@ -38,10 +38,10 @@ grader.addBasicPart('1b-0', testZeroHeuristic)
 # Problem 2b
 
 def testDelivery():
-    problem = submission.DeliveryProblem(util.deliveryScenario0)
+    problem = submission.DeliveryProblem(util.deliveryScenario2)
     algorithm = util.UniformCostSearch()
     algorithm.solve(problem)
-    grader.requireIsEqual(5, algorithm.totalCost)
+    grader.requireIsEqual(25, algorithm.totalCost)
 grader.addBasicPart('2b-0', testDelivery)
 
 
@@ -49,11 +49,11 @@ grader.addBasicPart('2b-0', testDelivery)
 # Problem 2c
 
 def testHeuristic1():
-    scenario = util.deliveryScenario1
+    scenario = util.deliveryScenario2
     problem = submission.DeliveryProblem(scenario)
     algorithm = submission.AStarSearch(submission.createHeuristic1(scenario))
     algorithm.solve(problem)
-    if algorithm.totalCost != 26:
+    if algorithm.totalCost != 25:
         grader.fail("heuristic1 produces wrong total cost")
         return
     # This is a coarse check, report your exact number of explored nodes in writeup
@@ -90,11 +90,11 @@ grader.addBasicPart('2d-0', testHeuristic2)
 # Problem 2e
 
 def testHeuristic3():
-    scenario = util.deliveryScenario3
+    scenario = util.deliveryScenario2
     problem = submission.DeliveryProblem(scenario)
     algorithm = submission.AStarSearch(submission.createHeuristic3(scenario))
     algorithm.solve(problem)
-    if algorithm.totalCost != 27:
+    if algorithm.totalCost != 25:
         grader.fail("heuristic3 produces wrong total cost")
         return
     # This is a coarse check, report your exact number of explored nodes in writeup
