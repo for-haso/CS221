@@ -11,7 +11,10 @@ def computeQ(mdp, V, state, action):
     documentation).
     """
     # BEGIN_YOUR_CODE (around 2 lines of code expected)
-    raise Exception("Not implemented yet")
+    #(newState, prob, reward)
+    succs = mdp.succAndProbReward(state, action)
+    discount = mdp.discount()
+    return sum([succ[1]*(succ[2] + (discount * V[succ[0]])) for succ in succs])
     # END_YOUR_CODE
 
 ############################################################
@@ -23,7 +26,17 @@ def policyEvaluation(mdp, V, pi, epsilon=0.001):
     Initialize the computation with |V|.
     """
     # BEGIN_YOUR_CODE (around 12 lines of code expected)
-    raise Exception("Not implemented yet")
+    mdp.computeStates()
+    oldV = V.copy()
+    newV = dict()
+    counter = set()
+    while len(counter) != len(mdp.states):
+        for s in mdp.states:
+            newV[s] = computeQ(mdp, oldV, s, pi[s])
+            if abs(oldV[s] - newV[s]) < epsilon:
+                counter.add(s)
+            oldV[s] = newV[s]
+    return newV
     # END_YOUR_CODE
 
 ############################################################
@@ -35,18 +48,46 @@ def computeOptimalPolicy(mdp, V):
     You might find it handy to call computeQ().
     """
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    raise Exception("Not implemented yet")
+    pi = dict()
+    for state in mdp.states:
+        max_a = None
+        max_Q = None
+        actions = mdp.actions(state)
+        for action in actions:
+            Q = computeQ(mdp, V, state, action)
+            if max_Q == None or Q > max_Q:
+                max_Q = Q
+                max_a = action
+        pi[state] = max_a
+    return pi
     # END_YOUR_CODE
 
 ############################################################
 # Problem 1d
+
+def IsChanging(states, prev_pi, pi):
+    for state in states:
+        if state in prev_pi and state in pi:
+            if prev_pi[state] != pi[state]:
+                return True
+        else:
+            return True
+    return False
 
 class PolicyIteration(util.MDPAlgorithm):
     def solve(self, mdp, epsilon=0.001):
         mdp.computeStates()
         # compute V and pi
         # BEGIN_YOUR_CODE (around 11 lines of code expected)
-        raise Exception("Not implemented yet")
+        V = dict()
+        for state in mdp.states:
+            V[state] = 0.0
+        prev_pi = dict()
+        pi = dict()
+        while IsChanging(mdp.states, prev_pi, pi):
+            prev_pi = pi.copy()
+            pi = computeOptimalPolicy(mdp, V)
+            V = policyEvaluation(mdp, V, pi, epsilon)
         # END_YOUR_CODE
         self.pi = pi
         self.V = V
@@ -58,10 +99,22 @@ class ValueIteration(util.MDPAlgorithm):
     def solve(self, mdp, epsilon=0.001):
         mdp.computeStates()
         # BEGIN_YOUR_CODE (around 12 lines of code expected)
-        raise Exception("Not implemented yet")
+        oldV = dict()
+        for state in mdp.states:
+            oldV[state] = 0.0
+        newV = oldV.copy()
+        counter = set()
+        pi = dict()
+        while len(counter) != len(mdp.states):
+            pi = computeOptimalPolicy(mdp, newV)
+            for s in mdp.states:
+                newV[s] = computeQ(mdp, oldV, s, pi[s])
+                if abs(oldV[s] - newV[s]) < epsilon:
+                    counter.add(s)
+                oldV[s] = newV[s]
         # END_YOUR_CODE
         self.pi = pi
-        self.V = V
+        self.V = newV
 
 ############################################################
 # Problem 1f
@@ -70,6 +123,8 @@ class ValueIteration(util.MDPAlgorithm):
 # the code blocks below.  If you decide that 1f is false, construct a
 # counterexample by filling out this class and returning an alpha value in
 # counterexampleAlpha().
+
+# TODO
 class CounterexampleMDP(util.MDP):
     def __init__(self):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
@@ -137,7 +192,54 @@ class BlackjackMDP(util.MDP):
     # coming out of |state|.
     def succAndProbReward(self, state, action):
         # BEGIN_YOUR_CODE (around 50 lines of code expected)
-        raise Exception("Not implemented yet")
+        actions = self.actions(state)
+        succAndRewards = list()
+
+        if state[2] == (0,):
+            return succAndRewards
+        
+        #Quit   
+        if action == actions[2]:
+            newState = list(state)
+            newState[2] = (0,)
+            succAndRewards.append((tuple(newState), 1, state[0]))
+
+        #Take
+        elif action == actions[0]:
+            if state[1] != None:
+                newDeck = list(state[2])
+                newDeck[card] = newDeck[card] - 1
+                newState = (state[0] + self.cardValues(state[1]), None, tuple(newDeck))
+                succAndRewards.append((newState, 1.0, 0))
+            else:
+                deck = state[2]
+                totalCards = sum(deck)
+                for card, count in enumerate(deck):
+                    prob = count * 1.0 / totalCards
+                    newDeck = list(deck)
+                    newDeck[card] = newDeck[card] - 1
+                    newCardCount = state[0] + self.cardValues[card]
+                    reward = 0
+                    if sum(newDeck) == 0:
+                        reward = newCardCount
+                    
+                    if newCardCount > self.threshold:
+                        newState = (newCardCount, state[1], (0,))
+                        succAndRewards.append((newState, prob, reward))
+                    else:
+                        newState = (newCardCount, state[1], tuple(newDeck))
+                        succAndRewards.append((newState, prob, reward))
+        #Peek
+        elif action == actions[1]:
+            if state[1] == None:
+                deck = state[2]
+                totalCards = sum(deck)
+                for card, count in enumerate(deck):
+                    prob = count * 1.0 / totalCards
+                    newState = (state[0], card, state[2])
+                    succAndRewards.append((newState, prob, -1))
+
+        return succAndRewards
         # END_YOUR_CODE
 
     def discount(self):
@@ -151,6 +253,7 @@ def peekingMDP():
     Return an instance of BlackjackMDP where peeking is the optimal action at
     least 10% of the time.
     """
+    #TODO
     # BEGIN_YOUR_CODE (around 2 lines of code expected)
     raise Exception("Not implemented yet")
     # END_YOUR_CODE
@@ -236,6 +339,7 @@ def blackjackFeatureExtractor(state, action):
 ############################################################
 # Problem 3d: changing mdp
 
+#TODO redownload code
 # Original mdp
 originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
 
