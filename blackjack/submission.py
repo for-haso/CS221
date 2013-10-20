@@ -194,40 +194,44 @@ class BlackjackMDP(util.MDP):
         # BEGIN_YOUR_CODE (around 50 lines of code expected)
         actions = self.actions(state)
         succAndRewards = list()
-
-        if state[2] == (0,):
+        if sum(state[2]) == 0 or state[0] > self.threshold:
             return succAndRewards
-        
         #Quit   
         if action == actions[2]:
-            newState = list(state)
-            newState[2] = (0,)
-            succAndRewards.append((tuple(newState), 1, state[0]))
+            succAndRewards.append(((state[0], None, (0,)), 1.0, state[0]))
 
         #Take
         elif action == actions[0]:
+            # Peeked previously
             if state[1] != None:
                 newDeck = list(state[2])
-                newDeck[card] = newDeck[card] - 1
-                newState = (state[0] + self.cardValues(state[1]), None, tuple(newDeck))
+                newDeck[state[1]] = newDeck[state[1]] - 1
+                newValue = state[0] + self.cardValues[state[1]]
+                if newValue > self.threshold:
+                    newDeck = [0]
+                newState = (newValue, None, 
+                            tuple(newDeck))
                 succAndRewards.append((newState, 1.0, 0))
             else:
                 deck = state[2]
                 totalCards = sum(deck)
-                for card, count in enumerate(deck):
+                for cardIndex, count in enumerate(deck):
+                    if count <= 0: 
+                        continue
                     prob = count * 1.0 / totalCards
                     newDeck = list(deck)
-                    newDeck[card] = newDeck[card] - 1
-                    newCardCount = state[0] + self.cardValues[card]
+                    newDeck[cardIndex] = newDeck[cardIndex] - 1
+                    newCardCount = state[0] + self.cardValues[cardIndex]
                     reward = 0
-                    if sum(newDeck) == 0:
-                        reward = newCardCount
-                    
                     if newCardCount > self.threshold:
                         newState = (newCardCount, state[1], (0,))
                         succAndRewards.append((newState, prob, reward))
                     else:
-                        newState = (newCardCount, state[1], tuple(newDeck))
+                        if sum(newDeck) == 0:
+                            reward = newCardCount
+                            newState = (newCardCount, state[1], (0,))
+                        else:
+                            newState = (newCardCount, state[1], tuple(newDeck))
                         succAndRewards.append((newState, prob, reward))
         #Peek
         elif action == actions[1]:
@@ -235,6 +239,7 @@ class BlackjackMDP(util.MDP):
                 deck = state[2]
                 totalCards = sum(deck)
                 for card, count in enumerate(deck):
+                    if count <= 0: continue
                     prob = count * 1.0 / totalCards
                     newState = (state[0], card, state[2])
                     succAndRewards.append((newState, prob, -1))
@@ -289,7 +294,20 @@ class QLearningAlgorithm(util.RLAlgorithm):
     def getAction(self, state):
         self.numIters += 1
         # BEGIN_YOUR_CODE (around 4 lines of code expected)
-        raise Exception("Not implemented yet")
+        actions = self.actions(state)
+        max_a = None
+        if random.random() < self.explorationProb:
+            index = random.randrange(len(actions))
+            max_a = actions[index]
+        else:
+            
+            max_Q = None
+            for action in actions:
+                Q = self.getQ(state, action)
+                if max_Q == None or Q > max_Q:
+                    max_Q = Q
+                    max_a = action
+        return max_a 
         # END_YOUR_CODE
 
     # Call this function to get the step size to update the weights.
@@ -302,7 +320,15 @@ class QLearningAlgorithm(util.RLAlgorithm):
     # self.getQ() to compute the current estimate of the parameters.
     def incorporateFeedback(self, state, action, reward, newState):
         # BEGIN_YOUR_CODE (around 12 lines of code expected)
-        raise Exception("Not implemented yet")
+        r = None
+        if newState == None:
+            r = reward - self.getQ(state, action)
+        else:
+            r = (reward + self.discount * max([self.getQ(newState, a) for a in self.actions(newState)]) 
+                 - self.getQ(state, action))
+        featureVector = self.featureExtractor(state, action)
+        for pair in featureVector:
+            self.weights[pair[0]] = self.weights[pair[0]] + self.getStepSize() * r * pair[1]
         # END_YOUR_CODE
 
 ############################################################
@@ -333,7 +359,13 @@ def identityFeatureExtractor(state, action):
 def blackjackFeatureExtractor(state, action):
     total, nextCard, counts = state
     # BEGIN_YOUR_CODE (around 6 lines of code expected)
-    raise Exception("Not implemented yet")
+    features = list()
+    features.append(((total, action), 1))
+    cardPresence = [1 if count > 0 else 0 for count in counts]
+    features.append(((tuple(cardPresence), action), 1))
+    for i, count in enumerate(counts):
+        features.append(((i, count, action), 1))
+    return features
     # END_YOUR_CODE
 
 ############################################################
