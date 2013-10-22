@@ -1,0 +1,335 @@
+<head>
+  <title>Peeking Blackjack</title>
+  <script src="plugins/main.js"></script>
+</head>
+
+<body onload="onLoad('Pokey Rule')">
+
+<div id="assignmentHeader"></div>
+
+<p>
+<img class="float-right" src="blackjack.jpg" style="width:260px;margin-left:10px"/>
+</p>
+
+<p>
+The search algorithms explored in the previous assignment work great when you
+know exactly the results of your actions.  Unfortunately, the real world is
+not so predictable.  One of the key aspects of an effective AI is the ability
+to reason in the face of uncertainty.  
+</p>
+
+<p>
+Markov decision processes (MDPs) can be used to formalize uncertain
+situations where the goal is to maximize some kind of reward.  In this
+homework, you will implement the algorithms that can be used to automatically
+construct an optimal policy for any such uncertain situation.  You will then
+formalize a modified version of Blackjack as an MDP, and apply your algorithm
+to come up with an optimal policy.  
+</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 1: Solving MDPs</div>
+
+<p>
+First, we will implement the general algorithms that will work on any
+MDP.  Later, we'll create the specific MDP for Blackjack.
+</p>
+
+<ol class="problem">
+
+<li class="code">
+<p>
+As a warmup, we'll start by implementing $Q$ from $V$, filling out
+the <code>computeQ()</code> function.  Recall that $V(s)$ is
+the value (expected utility) starting at state $s$, given some policy. Given a
+value function, we can define $Q(s,a)$, the expected utility received when
+performing action $a$ in state $s$.  Recall from lecture that $Q$ can be
+expressed as a function of $V$ as follows:
+
+$$Q(s,a)=\sum_{s'} T(s,a,s') \left[\text{Reward}(s,a,s') +
+\gamma\cdot V(s')\right].$$
+
+In this equation, the transition probability $T(s,a,s')$ is the probability of
+ending up in state $s'$ after performing action $a$ in state $s$,
+$\text{Reward}(s,a,s')$ is the reward when you end up in state $s'$ after
+performing action $a$ in state $s$, and $0 \le \gamma \le 1$ is the discount,
+which is a parameter indicating how much we devalue rewards from future
+states. Intuitively, $V$ represents the value of a state, and $Q$ represents
+how valuable it is to perform a particular action in a particular state.  This
+will be a handy tool to have around.
+</p>
+
+</li>
+
+<li class="code">
+<p>
+Recall that policy iteration proceeds by alternating between
+(i) finding the value of all
+states given a particular policy (policy evaluation) and
+(ii) finding the optimal policy given a value function (policy improvement).
+</p>
+
+<p>
+We will first implement policy evaluation by filling out the function
+<code>policyEvaluation()</code>.  Given a policy $\pi$, we compute
+the value of each state in our MDP.  To do this, recall that we use the
+Bellman equation as an update rule:
+$$V_\pi^{(t)}(s) \leftarrow \sum_{s'} T(s,\pi(s),s') \left[\text{Reward}(s,\pi(s),s') +
+\gamma\cdot V^{(t-1)}_\pi(s')\right],$$
+where $V^{(t)}_\pi$ is the estimate of the value function of policy $\pi$
+after $t$ iterations. We repeatedly apply this equation until the new
+value $V_\pi^{(t)}(s)$ is less than $\epsilon$ from its old value
+$V_\pi^{(t-1)}(s)$ for every state $s$.
+</p>
+</li>
+
+<li class="code">
+Next, we compute the optimal policy given a particular value function $V$, in the
+function <code>computeOptimalPolicy()</code>.  This
+policy simply selects the action that has maximal $Q$ value for each state.
+As defined in lecture,
+$$\pi_{\text{new}}(s) = \mathop{\text{arg max}}_{a\in\text{Actions}(s)}Q(s,a).$$
+</li>
+
+<li class="code">
+Once we know how to construct a value function given a policy, and how to find
+the optimal policy given a value function, we can perform policy iteration.
+Fill out the <code>solve()</code> function in class
+<code>PolicyIteration</code>. Start with a value function that is $0$ for all
+states, and then alternate between finding the optimal policy for your current
+value function, and finding the value function for your current policy.  Stop
+when your optimal policy stops changing.
+</li>
+
+<li class="code">
+As discussed in lecture, as an alternative to performing a full policy
+evaluation in each iteration, as in policy iteration, we can replace it with a
+single step of policy evaluation.  In other words, alternate between finding
+the optimal policy for your current value function, and doing a single step of
+policy evaluation.  Stop when the new value $V_\pi^{(t)}(s)$ is less than
+$\epsilon$ from its old value $V_\pi^{(t-1)}(s)$ for every state $s$.  This
+algorithm is referred to as value iteration. Implement this algorithm in the
+<code>solve()</code> function in class <code>ValueIteration</code>.
+</li>
+
+<li class="code">
+<p>
+If we add noise to the transitions of an MDP, does the optimal
+value get worse?
+Specifically, consider an MDP with reward function
+$\text{Reward}(s,a,s')$, state space $\text{States}$, and transition function
+$T(s,a,s')$.  We define a new MDP which is identical to the original, except
+for its transition function, $T'(s,a,s')$, which is defined as
+
+$$T'(s,a,s')=\frac{T(s,a,s')+\alpha}{\sum_{s'\in\text{States}}\left[T(s,a,s')+\alpha\right]}$$
+
+for some $\alpha&gt;0$. Let $V_1$ be the optimal value function for the
+original MDP, and $V_2$ the optimal value function for the MDP with added
+uniform noise.  Is it always the case that $V_1(s_\text{start})\geq
+V_2(s_\text{start})$?  If so,
+prove it in <code>writeup.pdf</code> and put <code>return None</code> for each of the code blocks.
+Otherwise, construct a counterexample by filling out <code>CounterexampleMDP</code> and
+<code>counterexampleAlpha()</code>.
+</p>
+
+
+</li>
+
+</ol>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 2: Peeking Blackjack</div>
+
+<p>
+Now that we have written general-purpose MDP algorithms, let's use them
+to play (a modified version of) Blackjack.
+For this problem, you will be creating an MDP to describe a modified version
+of Blackjack.
+</p>
+
+<p>
+For our version of Blackjack, the deck can contain an
+arbitrary collection of cards with different values, each with a given
+multiplicity.  For example, a standard deck would have card values $\{1, 2, \ldots, 
+13\}$ and multiplicity 4.  However, you could also have a deck with card values
+$\{1,5,20\}$, or any other set of numbers.
+The deck is shuffled (each permutation of the cards is equally likely).
+</p>
+
+<p>
+The game occurs in a sequence of rounds.
+Each round, the player either
+(i) takes a card from the top of the deck (costing nothing),
+(ii) peeks at the top card
+(costing <code>peekCost</code>, in which case the next round, that card will be drawn),
+or (iii) quits the game.
+Note that it is not possible to peek twice; if the player peeks twice in a row, then
+<code>succAndProbReward()</code> should return <code>[]</code>.
+</p>
+
+<p>
+The game continues until one of the following conditions becomes true:
+<ul>
+   <li>The player quits, in which case her reward is the sum of the cards in her hand.
+   <li>The player takes a card, and this leaves her with a sum that is greater than the
+threshold, in which case her reward is 0.
+   <li>The deck runs out of cards, in which case it is as if she quits, and she
+gets a reward which is the sum of the cards in her hand.
+</ul>
+</p>
+
+<p>
+As an example, assume the deck has card values $\{1,5\}$, with multiplicity 2.
+Let's say the threshold is 10.  Initially, the player has no cards, so her
+total is 0.  At this point, she can peek, take, or quit.  If she quits, the
+game is over and she receives a reward of 0.  If she takes the card, a card
+will be selected from the deck uniformly at random.  Assuming the card is a 5,
+then her total is 5, and the deck would then contain two 1's and one 5.  If she
+peeks, then the deck remains the same, and she still has no cards in her hand,
+but on the next round she is allowed to make her decision using her knowledge
+of the next card.  
+</p>
+
+<p>
+Let's assume she peeks and the card is a 5.  Then her hand still contains no
+cards, and on the next round, she is faced with the same choice of peek, take
+or quit.  If she peeks again, then the set of possible next states is empty.
+If she takes, then the card will be a 5, and the deck will be left with two
+1's and one 5.
+</p>
+
+<ol class="problem">
+
+<li class="code">
+Implement the game of Blackjack as an MDP by filling out the
+<code>succAndProbReward()</code> function of class <code>BlackjackMDP</code>.
+To help out out, we have already given you <code>startState()</code>.
+</li>
+
+<li class="code">
+Let's say you're running a casino, and you're trying to design a deck to make
+people peek a lot.  Assuming a fixed threshold of 20, and a peek cost of 1,
+your job is to design a deck where for at least 10% of states, the optimal policy is to peek.
+Fill out the function <code>peekingMDP()</code> to return an instance of
+<code>BlackjackMDP</code> where the optimal action is to peek in at least
+10% of states.
+</li>
+
+</ol>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 3: Learning to play Blackjack</div>
+
+<p>
+So far, we've seen how MDP algorithms can take an MDP which describes the full
+dynamics of the game and return an optimal policy.  But suppose you go into
+a casino, and no one tells you the rewards or the transitions.
+We will see how reinforcement learning can allow you to play the game
+and learn the rules at the same time!
+</p>
+
+<ol class="problem">
+
+<li class="code">
+<p>
+You will first implement a generic Q-learning algorithm <code>QLearningAlgorithm</code>,
+which is an instance of an <code>RLAlgorithm</code>.  As discussed in class,
+reinforcement learning algorithms are capable of executing a policy while
+simultaneously improving their policy.  Look in <code>simulate()</code>, in
+<code>util.py</code> to see how the <code>RLAlgorithm</code> will be used.  In
+short, your algorithm will be run in a simulation of the MDP, and will
+alternately be asked for an action to perform in a given state, and then be
+informed of the result of that action, so that it may learn better actions to
+perform in the future.
+</p>
+
+<p>
+Recall that Q-learning attempts to learn a Q function for an MDP, and uses the Q function
+to construct its policy.  To improve generalization, instead of learning the Q
+function directly, we represent states and actions using a feature
+representation.  That is, we have a <code>featureExtractor()</code> function
+that maps from a (state, action) pair to a feature vector.  We then learn a weight vector that maps
+from this feature representation to an approximate Q value.  You can see this
+in action in the <code>getQ()</code> function.  This function computes a dot
+product of the current weight vector with the feature values extracted from a
+given (state, action) pair.  
+</p>
+
+<p>
+Note that we represent a feature vector as a list of (object, double) pairs.
+This represents the same information as a dict, in that each object (feature) is
+mapped to a double (value).  This sparse list representation is more efficient
+than using a dict when most of the feature values are 0.  Because we only ever
+use our feature vector in dot products with or addition to the weight vector,
+we can represent the feature vector as a list and the weight vector as a dict.
+We can then always iterate over the feature vector and look up corresponding
+values in the weight vector dict.  
+</p>
+
+<p>
+At every step, Q-learning will select an action according to an
+$\epsilon$-greedy policy.  That is, with probability $\epsilon$, it will
+select an action uniformly at random, and with probability $1-\epsilon$, it
+will select action
+$$\pi(s)=\mathop{\text{arg max}}_{a\in\text{Actions}(s)}Q(s,a)$$
+where $Q$ is its current estimate of the $Q$ function for the MDP.  Implement
+this action selection step in <code>QLearningAlgorithm.getAction()</code>.  
+</p>
+
+<p>
+After action selection, the simulation will call 
+<code>QLearningAlgorithm.incorporateFeedback()</code> so that the Q-learning
+algorithm can improve its estimate of $Q$.  The function
+<code>incorporateFeedback</code> will be called with parameters $(s, a, r,
+s')$, where $s$ and $a$ are the state and action that the algorithm chose in
+the previous <code>getAction</code> step, and $r$ and $s'$ are the reward
+that was received and the state to which the MDP transitioned.  In the
+<code>incorporateFeedback</code> function, you first compute the residual
+$$r=\left[\text{Reward}(s,a,s')+\gamma
+\mathop{\text{max}}_{a'\in\text{Actions}(s')}Q^{(t)}(s',a')\right] - Q^{(t)}(s,a)$$
+This should then be used to update the weight vector representing our $Q$
+function:
+$$w^{(t+1)}=w^{(t)}+\eta \cdot r \cdot \phi(s,a)$$
+Here $\phi$ is the feature extractor <code>self.featureExtractor</code> and
+$\eta$ is the step size <code>getStepSize()</code>. Implement
+<code>QLearningAlgorithm.incorporateFeedback()</code>.
+</p>
+</li>
+
+<li class="writeup">
+Call <code>simulate</code> using your algorithm and the
+<code>identityFeatureExtractor()</code> on the MDP <code>smallMDP</code>, with
+30000 trials. Compare the policy learned in this case to the policy
+learned by value iteration.  Don't forget to set the explorationProb of your
+Q-learning algorithm to 0 after learning the policy.  How do the two policies
+compare (i.e., for how many states do they produce a different action)?  Now
+run <code>simulate()</code> on <code>largeMDP</code>.  How does the policy
+learned in this case compare to the policy learned by value iteration?  What
+went wrong?
+
+
+</li>
+
+<li class="code">
+To address the problems explored in the previous exercise, we incorporate
+domain knowledge to improve generalization.  This way, the algorithm can use
+what it learned about some states to improve its prediction performance on
+other states. Implement <code>blackjackFeatureExtractor</code>.
+Using this feature extractor, you should be able to get pretty close to the
+optimum on the <code>largeMDP</code>.
+</li>
+
+<li class="writeup">
+Now let's explore the way in which value iteration responds to a change in the
+rules of the MDP.  Run value iteration on <code>originalMDP</code> to compute an
+optimal policy.  Then apply your policy to <code>newThresholdMDP</code> by
+calling <code>simulate</code> with <code>FixedRLAlgorithm</code>, instantiated
+using your computed policy.  What reward do you get? What happens if you run Q
+learning on <code>newThresholdMDP</code> instead? Explain.
+
+
+</li>
+
+</ol>
+
+</body>

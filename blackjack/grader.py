@@ -47,7 +47,6 @@ def test1b():
         goldV[int(state)] = float(value)
     V = submission.policyEvaluation(mdp, V, pi, .0001)
     for state in range(-5,6):
-        # print '{}\t{}'.format(state, V[state])
         if not grader.requireIsLessThan(.001, abs(goldV[state] - V[state])):
             print '   state: {}'.format(state)
 grader.addBasicPart('1b', test1b)
@@ -74,7 +73,6 @@ def testIteration(algorithm):
         goldV[int(state)] = float(value)
     algorithm.solve(mdp, .0001)
     for state in range(-5,6):
-        # print '{}\t{}'.format(state, algorithm.V[state])
         if not grader.requireIsEqual(goldPi[state], algorithm.pi[state]):
             print '   action for state: {}'.format(state)
         if not grader.requireIsLessThan(.001, abs(goldV[state] - algorithm.V[state])):
@@ -89,22 +87,28 @@ def test1e():
 grader.addBasicPart('1e', test1e)
 
 def test2a():
-    mdp = submission.BlackjackMDP(cardValues=[1, 5], multiplicity=2,
-                                  threshold=10, peekCost=1)
-    startState = mdp.startState()
+    mdp1 = submission.BlackjackMDP(cardValues=[1, 5], multiplicity=2,
+                                   threshold=10, peekCost=1)
+    startState = mdp1.startState()
     preBustState = (6, None, (1, 1))
     postBustState = (11, None, (0,))
+
+    mdp2 = submission.BlackjackMDP(cardValues=[1, 5], multiplicity=2,
+                                   threshold=15, peekCost=1)
+    preEmptyState = (11, None, (1,0))
+
     tests = [([((1, None, (1, 2)), 0.5, 0), ((5, None, (2, 1)), 0.5, 0)],
-              startState, 'Take'),
+              mdp1, startState, 'Take'),
              ([((0, 0, (2, 2)), 0.5, -1), ((0, 1, (2, 2)), 0.5, -1)],
-              startState, 'Peek'),
-             ([((0, None, (0,)), 1, 0)], startState, 'Quit'),
+              mdp1, startState, 'Peek'),
+             ([((0, None, (0,)), 1, 0)], mdp1, startState, 'Quit'),
              ([((7, None, (0, 1)), 0.5, 0), ((11, None, (0,)), 0.5, 0)],
-              preBustState, 'Take'),
-             ([], postBustState, 'Take'),
-             ([], postBustState, 'Peek'),
-             ([], postBustState, 'Quit')]
-    for gold, state, action in tests:
+              mdp1, preBustState, 'Take'),
+             ([], mdp1, postBustState, 'Take'),
+             ([], mdp1, postBustState, 'Peek'),
+             ([], mdp1, postBustState, 'Quit'),
+             ([((12, None, (0,0)), 1, 12)], mdp2, preEmptyState, 'Take')]
+    for gold, mdp, state, action in tests:
         if not grader.requireIsEqual(gold,
                                      mdp.succAndProbReward(state, action)):
             print '   state: {}, action: {}'.format(state, action)

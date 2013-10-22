@@ -8,13 +8,10 @@ def computeQ(mdp, V, state, action):
     Return Q(state, action) based on V(state).  Use the properties of the
     provided MDP to access the discount, transition probabilities, etc.
     In particular, MDP.succAndProbReward() will be useful (see util.py for
-    documentation).
+    documentation).  Note that |V| is a dictionary.  
     """
     # BEGIN_YOUR_CODE (around 2 lines of code expected)
-    #(newState, prob, reward)
-    succs = mdp.succAndProbReward(state, action)
-    discount = mdp.discount()
-    return sum([succ[1]*(succ[2] + (discount * V[succ[0]])) for succ in succs])
+    raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -23,20 +20,11 @@ def computeQ(mdp, V, state, action):
 def policyEvaluation(mdp, V, pi, epsilon=0.001):
     """
     Return the value of the policy |pi| up to error tolerance |epsilon|.
-    Initialize the computation with |V|.
+    Initialize the computation with |V|.  Note that |V| and |pi| are
+    dictionaries.
     """
     # BEGIN_YOUR_CODE (around 12 lines of code expected)
-    mdp.computeStates()
-    oldV = V.copy()
-    newV = dict()
-    counter = set()
-    while len(counter) != len(mdp.states):
-        for s in mdp.states:
-            newV[s] = computeQ(mdp, oldV, s, pi[s])
-            if abs(oldV[s] - newV[s]) < epsilon:
-                counter.add(s)
-            oldV[s] = newV[s]
-    return newV
+    raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -45,49 +33,22 @@ def policyEvaluation(mdp, V, pi, epsilon=0.001):
 def computeOptimalPolicy(mdp, V):
     """
     Return the optimal policy based on V(state).
-    You might find it handy to call computeQ().
+    You might find it handy to call computeQ().  Note that |V| is a
+    dictionary.
     """
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    pi = dict()
-    for state in mdp.states:
-        max_a = None
-        max_Q = None
-        actions = mdp.actions(state)
-        for action in actions:
-            Q = computeQ(mdp, V, state, action)
-            if max_Q == None or Q > max_Q:
-                max_Q = Q
-                max_a = action
-        pi[state] = max_a
-    return pi
+    raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
 # Problem 1d
 
-def IsChanging(states, prev_pi, pi):
-    for state in states:
-        if state in prev_pi and state in pi:
-            if prev_pi[state] != pi[state]:
-                return True
-        else:
-            return True
-    return False
-
 class PolicyIteration(util.MDPAlgorithm):
     def solve(self, mdp, epsilon=0.001):
         mdp.computeStates()
-        # compute V and pi
+        # compute |V| and |pi|, which should both be dicts
         # BEGIN_YOUR_CODE (around 11 lines of code expected)
-        V = dict()
-        for state in mdp.states:
-            V[state] = 0.0
-        prev_pi = dict()
-        pi = dict()
-        while IsChanging(mdp.states, prev_pi, pi):
-            prev_pi = pi.copy()
-            pi = computeOptimalPolicy(mdp, V)
-            V = policyEvaluation(mdp, V, pi, epsilon)
+        raise Exception("Not implemented yet")
         # END_YOUR_CODE
         self.pi = pi
         self.V = V
@@ -98,23 +59,11 @@ class PolicyIteration(util.MDPAlgorithm):
 class ValueIteration(util.MDPAlgorithm):
     def solve(self, mdp, epsilon=0.001):
         mdp.computeStates()
-        # BEGIN_YOUR_CODE (around 12 lines of code expected)
-        oldV = dict()
-        for state in mdp.states:
-            oldV[state] = 0.0
-        newV = oldV.copy()
-        counter = set()
-        pi = dict()
-        while len(counter) != len(mdp.states):
-            pi = computeOptimalPolicy(mdp, newV)
-            for s in mdp.states:
-                newV[s] = computeQ(mdp, oldV, s, pi[s])
-                if abs(oldV[s] - newV[s]) < epsilon:
-                    counter.add(s)
-                oldV[s] = newV[s]
+        # BEGIN_YOUR_CODE (around 13 lines of code expected)
+        raise Exception("Not implemented yet")
         # END_YOUR_CODE
         self.pi = pi
-        self.V = newV
+        self.V = V
 
 ############################################################
 # Problem 1f
@@ -156,7 +105,7 @@ def counterexampleAlpha():
     # BEGIN_YOUR_CODE (around 1 line of code expected)
     raise Exception("Not implemented yet")
     # END_YOUR_CODE
-    
+
 ############################################################
 # Problem 2a
 
@@ -187,60 +136,11 @@ class BlackjackMDP(util.MDP):
         return ['Take', 'Peek', 'Quit']
 
     # Return a list of (newState, prob, reward) tuples corresponding to edges
-    # coming out of |state|.
+    # coming out of |state|.  Indicate a terminal state (after quitting or
+    # busting) by setting the deck to (0,).
     def succAndProbReward(self, state, action):
         # BEGIN_YOUR_CODE (around 50 lines of code expected)
-        actions = self.actions(state)
-        succAndRewards = list()
-        if sum(state[2]) == 0 or state[0] > self.threshold:
-            return succAndRewards
-        #Quit   
-        if action == actions[2]:
-            succAndRewards.append(((state[0], None, (0,)), 1.0, state[0]))
-
-        #Take
-        elif action == actions[0]:
-            # Peeked previously
-            if state[1] != None:
-                newDeck = list(state[2])
-                newDeck[state[1]] = newDeck[state[1]] - 1
-                newValue = state[0] + self.cardValues[state[1]]
-                if newValue > self.threshold:
-                    newDeck = [0]
-                newState = (newValue, None, 
-                            tuple(newDeck))
-                succAndRewards.append((newState, 1.0, 0))
-            else:
-                deck = state[2]
-                totalCards = sum(deck)
-                for cardIndex, count in enumerate(deck):
-                    if count <= 0: 
-                        continue
-                    prob = count * 1.0 / totalCards
-                    newDeck = list(deck)
-                    newDeck[cardIndex] = newDeck[cardIndex] - 1
-                    newCardCount = state[0] + self.cardValues[cardIndex]
-                    reward = 0
-                    if newCardCount > self.threshold:
-                        newState = (newCardCount, state[1], (0,))
-                        succAndRewards.append((newState, prob, reward))
-                    else:
-                        if sum(newDeck) == 0:
-                            reward = newCardCount
-                        newState = (newCardCount, state[1], tuple(newDeck))
-                        succAndRewards.append((newState, prob, reward))
-        #Peek
-        elif action == actions[1]:
-            if state[1] == None:
-                deck = state[2]
-                totalCards = sum(deck)
-                for card, count in enumerate(deck):
-                    if count <= 0: continue
-                    prob = count * 1.0 / totalCards
-                    newState = (state[0], card, state[2])
-                    succAndRewards.append((newState, prob, -1 * self.peekCost))
-
-        return succAndRewards
+        raise Exception("Not implemented yet")
         # END_YOUR_CODE
 
     def discount(self):
@@ -255,9 +155,7 @@ def peekingMDP():
     least 10% of the time.
     """
     # BEGIN_YOUR_CODE (around 2 lines of code expected)
-    mdp = BlackjackMDP(cardValues=[5, 21], multiplicity=4, 
-                       threshold=20, peekCost=1)
-    return mdp
+    raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
@@ -291,20 +189,7 @@ class QLearningAlgorithm(util.RLAlgorithm):
     def getAction(self, state):
         self.numIters += 1
         # BEGIN_YOUR_CODE (around 4 lines of code expected)
-        actions = self.actions(state)
-        max_a = None
-        if random.random() < self.explorationProb:
-            index = random.randrange(len(actions))
-            max_a = actions[index]
-        else:
-            
-            max_Q = None
-            for action in actions:
-                Q = self.getQ(state, action)
-                if max_Q == None or Q > max_Q:
-                    max_Q = Q
-                    max_a = action
-        return max_a 
+        raise Exception("Not implemented yet")
         # END_YOUR_CODE
 
     # Call this function to get the step size to update the weights.
@@ -317,28 +202,15 @@ class QLearningAlgorithm(util.RLAlgorithm):
     # self.getQ() to compute the current estimate of the parameters.
     def incorporateFeedback(self, state, action, reward, newState):
         # BEGIN_YOUR_CODE (around 12 lines of code expected)
-        r = None
-        if newState == None:
-            r = reward - self.getQ(state, action)
-        else:
-            r = (reward + self.discount * max([self.getQ(newState, a) for a in self.actions(newState)]) 
-                 - self.getQ(state, action))
-        featureVector = self.featureExtractor(state, action)
-        for pair in featureVector:
-            self.weights[pair[0]] = self.weights[pair[0]] + self.getStepSize() * r * pair[1]
+        raise Exception("Not implemented yet")
         # END_YOUR_CODE
 
-    def getActionWithoutExploring(self, state):
-        actions = self.actions(state)
-        max_a = None
-        max_Q = None
-        for action in actions:
-            Q = self.getQ(state, action)
-            if max_Q == None or Q > max_Q:
-                max_Q = Q
-                max_a = action
-        return max_a 
-
+# Return a singleton list containing indicator feature for the (state, action)
+# pair.  Provides no generalization.
+def identityFeatureExtractor(state, action):
+    featureKey = (state, action)
+    featureValue = 1
+    return [(featureKey, featureValue)]
 
 ############################################################
 # Problem 3b: convergence of Q-learning
@@ -352,51 +224,23 @@ largeMDP = BlackjackMDP(cardValues=[1, 3, 5, 8, 10], multiplicity=3, threshold=4
 ############################################################
 # Problem 3c: features for Q-learning.
 
-# Return a singleton list containing indicator feature for the (state, action)
-# pair.  Provides no generalization.
-def identityFeatureExtractor(state, action):
-    featureKey = (state, action)
-    featureValue = 1
-    return [(featureKey, featureValue)]
-
 # You should return a list of (feature key, feature value) pairs (see
 # identityFeatureExtractor()).
 # Implement the following features:
 # - indicator on the total and the action (1 feature).
-# - indicator on the presence/absence of each card (1 feature).
+# - indicator on the presence/absence of each card and the action (1 feature).
 # - indicator on the number of cards for each card type and the action (len(counts) features).
 def blackjackFeatureExtractor(state, action):
     total, nextCard, counts = state
     # BEGIN_YOUR_CODE (around 6 lines of code expected)
-    features = list()
-    features.append(((total, action), 1))
-    cardPresence = [1 if count > 0 else 0 for count in counts]
-    features.append(((tuple(cardPresence), action), 1))
-    for i, count in enumerate(counts):
-        features.append(((i, count, action), 1))
-    return features
+    raise Exception("Not implemented yet")
     # END_YOUR_CODE
 
 ############################################################
 # Problem 3d: changing mdp
 
-#TODO
 # Original mdp
 originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
 
 # New threshold
 newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, peekCost=1)
-
-
-#############################################################
-# 3b:
-
-mdp = largeMDP
-mdp.computeStates()
-Q = QLearningAlgorithm(mdp.actions, mdp.discount(),
-                       identityFeatureExtractor, 0.2)
-util.simulate(mdp, Q, 30000, sort=True)
-V = ValueIteration()
-V.solve(mdp)
-for state in mdp.states:
-    print state, Q.getActionWithoutExploring(state), V.pi[state]
