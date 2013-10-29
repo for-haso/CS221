@@ -191,13 +191,80 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 	Your minimax agent with alpha-beta pruning (problem 2)
 	"""
 
+	def getValue(self, gameState, depth, player, alpha, beta):
+		# base cases: terminal states
+		if depth == 0 and player == 0:
+			return self.evaluationFunction(gameState)
+		actions = gameState.getLegalActions(player)
+		if gameState.isWin() or gameState.isLose() or len(actions) == 0:
+			return self.evaluationFunction(gameState)
+		# recursive cases: still more states to go
+		# it's pacman's turn
+		if player == 0:
+			max_v = None
+			for action in actions:
+				nextState = gameState.generateSuccessor(player, action)
+				v = self.getValue(nextState, depth - 1, 1, alpha, beta)
+				if max_v != None:
+					if v > max_v:
+						max_v = v
+				else:
+					max_v = v
+				if beta != None:
+					if max_v >= beta:
+						return max_v
+				if alpha != None:
+					alpha = max([alpha, max_v])
+				else:
+					alpha = max_v
+			return max_v
+		# else, if the current player is an opponent (ghost)
+		min_v = None
+		numAgents = gameState.getNumAgents()
+		for action in actions:
+			nextState = gameState.generateSuccessor(player, action)
+			v = self.getValue(nextState, depth, (player + 1) % numAgents, alpha, beta)
+			if min_v != None:
+				if v < min_v:
+					min_v = v
+			else:
+				min_v = v
+			if alpha != None:
+				if min_v <= alpha:
+					return min_v
+			if beta != None:
+				beta = min([beta, min_v])
+			else:
+				beta = min_v
+		return min_v
+
 	def getAction(self, gameState):
 		"""
 			Returns the minimax action using self.depth and self.evaluationFunction
 		"""
 
 		# BEGIN_YOUR_CODE (around 69 lines of code expected)
-		raise Exception("Not implemented yet")
+		numAgents = gameState.getNumAgents()
+		max_v = None
+		max_a = None
+		actions = gameState.getLegalActions(self.index)
+		if len(actions) == 0:
+			return None
+		
+		depth = self.depth
+		if self.index == 0:
+			depth -= 1
+		for action in actions:
+			nextState = gameState.generateSuccessor(self.index, action)
+			v = self.getValue(nextState, depth, (self.index + 1) % numAgents, None, None)
+			if max_v != None:
+				if v > max_v:
+					max_v = v
+					max_a = action
+			else:
+				max_v = v
+				max_a = action
+		return max_a
 		# END_YOUR_CODE
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
