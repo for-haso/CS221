@@ -272,6 +272,36 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 	Your expectimax agent (problem 3)
 	"""
 
+	def getValue(self, gameState, depth, player):
+		# base cases: terminal states
+		if depth == 0 and player == 0:
+			return self.evaluationFunction(gameState)
+		actions = gameState.getLegalActions(player)
+		if gameState.isWin() or gameState.isLose() or len(actions) == 0:
+			return self.evaluationFunction(gameState)
+		# recursive cases: still more states to go
+		# it's pacman's turn
+		if player == 0:
+			max_v = None
+			for action in actions:
+				nextState = gameState.generateSuccessor(player, action)
+				v = self.getValue(nextState, depth - 1, 1)
+				if max_v != None:
+					if v > max_v:
+						max_v = v
+				else:
+					max_v = v
+			return max_v
+		# else, if the current player is an opponent (ghost)
+		min_v = None
+		numAgents = gameState.getNumAgents()
+		expectation = 0
+		for action in actions:
+			nextState = gameState.generateSuccessor(player, action)
+			expectation += self.getValue(nextState, depth, (player + 1) % numAgents)
+		return expectation * 1.0 / len(actions)
+
+
 	def getAction(self, gameState):
 		"""
 			Returns the expectimax action using self.depth and self.evaluationFunction
@@ -281,7 +311,28 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		"""
 
 		# BEGIN_YOUR_CODE (around 70 lines of code expected)
-		raise Exception("Not implemented yet")
+		numAgents = gameState.getNumAgents()
+		max_v = None
+		max_a = None
+		actions = gameState.getLegalActions(self.index)
+		if len(actions) == 0:
+			return None
+		
+		depth = self.depth
+		if self.index == 0:
+			depth -= 1
+		for action in actions:
+			nextState = gameState.generateSuccessor(self.index, action)
+			v = self.getValue(nextState, depth, (self.index + 1) % numAgents)
+			if max_v != None:
+				if v > max_v:
+					max_v = v
+					max_a = action
+			else:
+				max_v = v
+				max_a = action
+		print max_v
+		return max_a
 		# END_YOUR_CODE
 
 def betterEvaluationFunction(currentGameState):
