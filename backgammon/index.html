@@ -1,0 +1,243 @@
+<head>
+  <title>TD Backgammon</title>
+  <script src="plugins/main.js"></script>
+</head>
+
+<body onload="onLoad('Awni Hannun')">
+
+<div id="assignmentHeader"></div>
+
+<p>
+<span style="color:red;">Last Update: 10/25/2013 10 PM</span>
+</p>
+
+<p>
+<img class="float-right" src="backgammon_board.jpg" style="width:360px;margin-left:10px"/>
+</p>
+
+<p>
+In the early nineties, Gerry Tesauro built <a
+  href="http://www.bkgm.com/articles/tesauro/tdl.html">TD-Gammon</a>, a program
+that <i>learned</i> to play Backgammon
+by starting with only knowledge of the rules and
+playing itself over and over again.
+TD-Gammon reached the level of a human expert and was hailed as one of the first successful
+applications of reinforcement learning.
+In this assignment, you will build an AI agent to play a
+simplified version of Backgammon,
+drawing from ideas in both reinforcement learning and game playing.
+</p>
+<p>
+This assignment has two parts. First, you will implement a heuristic evaluation
+function and use this in a reflex agent and an expectimax agent.
+You will find that these approaches are not strong enough to even win consistently
+against a random player.
+In the second part, you will learn a good evaluation function using the
+temporal difference (TD) algorithm.
+</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Backgammon Rules</div>
+
+<p>
+First, let's get familiar with the game. Backgammon is a two-player game of
+strategy and chance in which the objective is to be the first to remove all your pieces from the
+board.  <!--The game starts in an initial configuration of pieces.  The
+players alternate turns rolling two die each.  The player can then move their
+pieces towards their home quadrant based on the values of the die. The players'
+home quadrants are on opposite sides of the board and thus they move in
+opposing directions. Once all of a player's pieces are in their home quadrant
+of the board they can begin to clear them.
+Singleton pieces can be clobbered by the opponent and placed on the "bar".-->
+We will be working with a simplified version of Backgammon, described below
+(for those of you interested, here are the <a
+  href="http://www.bkgm.com/rules.html">rules</a> for the full version).
+
+<ul>
+<li>Each player starts with 8 pieces (in some initial configuration).  We will denote the players and their pieces by 'o' and 'x'.</li>
+<li>The board has 16 columns (numbered 0..15) where each column can hold any number of pieces, but each column can only contain pieces owned by one of the players.</li>
+<li>Each player is associated with a home quadrant of the board.  Specifically, the home quadrant for 'o' is the last four columns (columns 12-15), and the home quadrant for 'x' is the first four columns (columns 0-3).</li>
+<li>The two players alternate turns. On a player's turn, she rolls two 4-sided die.
+The player can then move her pieces only towards her home quadrant according to the value of each dice separately.
+For example, if the roll is (3,2), then the player can move any of her pieces 3 columns forward
+and any piece (possibly the same one) 2 columns forward, provided each move is legal (see below).</li>
+<li>A piece can only be moved to an empty column, a column that contains that player's own pieces, or a column that contains a single piece belonging to the other player.
+If the third scenario occurs, then the single piece is clobbered and permanently removed from play (placed on the "bar").</li>
+<li>Once all the pieces of a player are in that player's home quadrant,
+the player can then remove pieces from the board by advancing them
+according to the roll of the die.
+If a piece is removed from play in this way, we will say the piece is "off".</li>
+<li>Note a piece can only be moved "off" if one of the dice rolls is exactly the number of columns needed to carry the piece off <strong>or</strong>
+the dice roll is more than the number of columns needed
+and all other pieces further away have been moved off already.</li>
+<li>The game ends when one player has all of her pieces removed from play (both "off" pieces and pieces on the "bar").
+<li>The winner is the player that has the most pieces "off".
+Ties will be broken by number of pieces on the bar (the fewer the better).</li>
+</ul>
+
+In this assignment, you will always be playing against <code>RandomAgent</code>,
+which picks a legal move uniformly at random.  Try playing the simplified
+version of Backgammon
+<pre>python run.py -d -p human</pre>
+Here, <code>-d</code> draws the board on the screen,
+and <code>-p human</code> enables the <code>HumanAgent</code> (you).
+
+Try playing a few games to get a feel for how this simplified version of
+Backgammon works and perhaps some strategies for winning.  Even with a
+seemingly good agent, beating the random agent consistently can be challenging.
+Let's see what we can do.
+</p>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 1: Simple Evaluation and Search</div>
+
+<p>
+You will first implement a simple evaluation function and use it to power a
+reflex agent and an expectimax agent.  Your agent will be playing from the
+point of view of the first player, <code>game.players[0]</code> whose home
+quadrant is columns 12-15. The simple evaluation function should evaluate the
+current game state by counting (i) the number of pieces that the player has
+successfully removed from play, and (ii) the number that the player has in the
+home quadrant (columns 12-15) minus the number of bar pieces.
+</p>
+
+<p>$$V(s) = 10 \cdot \text{numOffPieces} + \text{numHomePieces} - \frac{1}{10}\cdot \text{numBarPieces}$$</p>
+
+<ol class="problem">
+
+  <li class="code">Implement the <code>simpleEvaluation</code> function described above.
+  You can test your code with the supplied basic tests in <code>grader.py</code> by running:
+<pre>python grader.py</pre>
+</li>
+
+<li class="code">Now let's see how well this evaluation function works in the context of a
+simple reflex agent that myopically chooses the best action.  Implement the
+method <code>getAction</code> of the <code>ReflexAgent</code> class.  If there
+are several actions which tie with the maximum value of $V(s)$, choose the action which is
+lexicographically the largest (hint: use Python's <code>max</code> function).
+Play this <code>ReflexAgent</code> against the <code>RandomAgent</code>
+by running:
+<pre>python run.py -p reflex -n 100</pre>
+
+This will run 100 games and give the outcome for each followed by a summary.
+Notice that the <code>ReflexAgent</code> does better than chance against the
+<code>RandomAgent</code> but still loses fairly often.  This suggests that a
+winning strategy for the game may be more subtle.
+
+</li>
+
+<li class="code">Now implement the <code>getAction</code> function of the
+<code>ExpectimaxAgent</code>.  Note that since you are playing a <code>RandomAgent</code>,
+the expectation is with respect to the joint probability of rolling the die and the opponent's action.
+You only need to implement this for a 2-ply lookahead, in other words, the move
+that maximizes the expected value of the game state after the random player moves.
+If there are no actions for any roll, just return 0.
+Try your agent out with:
+<pre>python run.py -p expectimax -n 100</pre>
+
+<p>You should also have noticed the <code>ExpectimaxAgent</code> is much much
+slower than the simple <code>ReflexAgent</code>. This is because Backgammon has
+a very large branching factor.
+This means that we will need to resort to other methods to make our agent stronger
+rather than better search.  In particular, we will focus next on learning a better
+evaluation function.</p>
+</li>
+
+</ol>
+
+<!------------------------------------------------------------>
+<div class="problemTitle">Problem 2: TD Learning</div>
+
+<p>
+Now you will implement a much better AI agent for Backgammon by learning an
+evaluation function.  The evaluation function will be parametrized by a set of
+features, and the TD learning algorithm will be used to train the weights of
+those features.
+</p>
+
+
+<ol class="problem">
+
+<li class="code">We will use features based on TD-Gammon<sup><a href="#fn-1">[1]</a></sup>.
+<ul>
+<p>
+<center>
+<img class="float-right" src="simple_bkg.png" style="width:190px;margin-left:10px"/>
+</center>
+</p>
+
+  <li>
+  For each column of the grid there are 3 features. The first
+  is 1 if player 'o' has at least one piece on the column and 0 otherwise.
+  The second feature is 1 if player 'o' has at least two pieces on the column and 0 otherwise.
+  The third feature encodes the number by which the number of pieces exceeds 2 (or 0 if the number of pieces is less than 2).
+  For example, if there are 4 'o's on a column, that column's features would be [1,1,2].
+  </li>
+  <li>We have a feature equal to the number of pieces that 'o' has on the bar.</li>
+  <li>We have a feature equal to the number of pieces that 'o' has successfully removed from play
+  divided by the total number of pieces that 'o' has, given by <code>game.numPieces</code>.</li>
+  <li>The above features are repeated, but for player 'x'.</li>
+  <li>There are two features corresponding to whose turn it is (e.g. [1 0] for 'o', [0 1] for 'x').</li>
+  <li>The final feature is the constant 1 (the bias term).</li>
+</ul>
+<p>For example, we can encode the very simple board in the figure with 30 numbers.
+Assuming that player 'o' has the turn, the feature vector would be:
+<pre>
+phi(x) = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0.5] + # features for 'o' pieces
+         [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0]   + # features for 'x' pieces
+         [1, 0]                                       + # turn features ('o'-s turn)
+         [1]                                            # bias
+</pre>
+</p>
+Implement the above features for the full-size game (16-columns and 8 pieces
+per player) by filling out the function <code>extractFeatures</code> in
+<code>submission.py</code>.  This function takes a <code>state</code> (which is
+a <code>(game,player)</code> pair) representing the game and the player whose
+turn it is.
+
+<li class="code">
+<p>Having defined features, we now define the evaluation function,
+which takes a dot product of the weights and the features,
+and applies the sigmoid function on the result to transform the value into 
+a number in $(0,1)$.
+You can think of this function as representing the probability of you winning.</P>
+
+<p>$V(s;\mathbb{w}) = \sigma\left(\mathbb{w} \cdot \phi(s)\right)$ where $\sigma(z) = \frac{1}{1+e^{-z}}$
+<p>Implement the <code>logLinearEvaluation</code> function.</p>
+</li>
+
+<li class="code">In order to learn the weights $\mathbb{w}$ which are passed to the <code>logLinearEvaluation</code> function,
+you will use the TD learning algorithm. Recall the residual $r$ (the target
+value minus the predicted value) is given by
+<P>$r = \left[ \text{Reward}(s,a,s') + \gamma V(s';\mathbb{w}) \right] - V(s;\mathbb{w})$</p>
+<p>The weights can than be updated by using $r$ and the gradient of the value function at state $s$,</p>
+<p>$\mathbb{w} \gets \mathbb{w} + \eta r \nabla_{\mathbb{w}}V(s;\mathbb{w})$</p>
+
+<p>Implement the <code>TDUpdate</code> function, which given a current state of the game, $s$, next state $s'$ of the game, reward $\text{Reward}(s,a,s')$, weights $\mathbb{w}$ and step-size $\eta$, updates the weights using the TD update. Assume $\gamma = 1$.</p>
+
+<p>Once your TD update is working, you can teach your <code>ReflexAgent</code>
+to play Backgammon by letting it play against itself for many games.
+To train your TD player for 2000 games, run:
+<pre>python run.py -t</pre>
+Note that this could take several minutes to run.
+With your weights trained (the weights will be saved to a file), you can test the <code>ReflexAgent</code> with the better evaluation function against <code>RandomAgent</code> by running
+<pre>python run.py -e -p reflex -n 100</pre>
+You should see your improved <code>ReflexAgent</code> (player 'o') win fairly consistently against the <code>RandomAgent</code>.
+<p>However, you can really crush the <code>RandomAgent</code> by using the
+better evaluation function with <code>ExpectimaxAgent</code> (which does a
+2-ply lookahead):
+<pre>python run.py -e -p expectimax -n 10</pre>
+</p>
+</li>
+
+</ol>
+
+
+<h3>References</h3>
+<p id="fn-1">[1]
+ <strong>Practical Issues in Temporal Difference Learning</strong>, Gerald Tesauro. <em>Machine Learning</em> 8, (1992), 257-277.(<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.20.3760&rep=rep1&type=pdf">pdf</a>)
+</p>
+
+<br/>
+<br/>
+</body>

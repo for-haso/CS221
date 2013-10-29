@@ -123,40 +123,43 @@ class ValueIteration(util.MDPAlgorithm):
 # the code blocks below.  If you decide that 1f is false, construct a
 # counterexample by filling out this class and returning an alpha value in
 # counterexampleAlpha().
+
 class CounterexampleMDP(util.MDP):
     def __init__(self):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
-        raise Exception("Not implemented yet")
+        pass
         # END_YOUR_CODE
 
     def startState(self):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
-        raise Exception("Not implemented yet")
+        return 0
         # END_YOUR_CODE
 
     # Return set of actions possible from |state|.
     def actions(self, state):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
-        raise Exception("Not implemented yet")
+        return {'flip'}
         # END_YOUR_CODE
 
     # Return a list of (newState, prob, reward) tuples corresponding to edges
     # coming out of |state|.
     def succAndProbReward(self, state, action):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
-        raise Exception("Not implemented yet")
+        if state == 1:
+            return []
+        return [(0, 0.1, 1), (1, 0.9, -1)]
         # END_YOUR_CODE
 
     def discount(self):
         # BEGIN_YOUR_CODE (around 1 line of code expected)
-        raise Exception("Not implemented yet")
+        return 1
         # END_YOUR_CODE
 
 def counterexampleAlpha():
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return 1
     # END_YOUR_CODE
-    
+
 ############################################################
 # Problem 2a
 
@@ -293,11 +296,11 @@ class QLearningAlgorithm(util.RLAlgorithm):
         # BEGIN_YOUR_CODE (around 4 lines of code expected)
         actions = self.actions(state)
         max_a = None
-        if random.random() < self.explorationProb:
+        rand = random.random()
+        if rand < self.explorationProb:
             index = random.randrange(len(actions))
             max_a = actions[index]
-        else:
-            
+        else:    
             max_Q = None
             for action in actions:
                 Q = self.getQ(state, action)
@@ -328,16 +331,16 @@ class QLearningAlgorithm(util.RLAlgorithm):
             self.weights[pair[0]] = self.weights[pair[0]] + self.getStepSize() * r * pair[1]
         # END_YOUR_CODE
 
-    def getActionWithoutExploring(self, state):
-        actions = self.actions(state)
-        max_a = None
-        max_Q = None
-        for action in actions:
-            Q = self.getQ(state, action)
-            if max_Q == None or Q > max_Q:
-                max_Q = Q
-                max_a = action
-        return max_a 
+    # def getActionWithoutExploring(self, state):
+    #     actions = self.actions(state)
+    #     max_a = None
+    #     max_Q = None
+    #     for action in actions:
+    #         Q = self.getQ(state, action)
+    #         if max_Q == None or Q > max_Q:
+    #             max_Q = Q
+    #             max_a = action
+    #     return max_a 
 
 
 ############################################################
@@ -380,7 +383,6 @@ def blackjackFeatureExtractor(state, action):
 ############################################################
 # Problem 3d: changing mdp
 
-#TODO
 # Original mdp
 originalMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=10, peekCost=1)
 
@@ -391,12 +393,30 @@ newThresholdMDP = BlackjackMDP(cardValues=[1, 5], multiplicity=2, threshold=15, 
 #############################################################
 # 3b:
 
-mdp = largeMDP
-mdp.computeStates()
-Q = QLearningAlgorithm(mdp.actions, mdp.discount(),
-                       identityFeatureExtractor, 0.2)
-util.simulate(mdp, Q, 30000, sort=True)
-V = ValueIteration()
-V.solve(mdp)
-for state in mdp.states:
-    print state, Q.getActionWithoutExploring(state), V.pi[state]
+# mdp = smallMDP
+# mdp.computeStates()
+# Q = QLearningAlgorithm(mdp.actions, mdp.discount(),
+#                        identityFeatureExtractor, 0.2)
+# util.simulate(mdp, Q, 30000, sort=True)
+# V = ValueIteration()
+# V.solve(mdp)
+# for state in mdp.states:
+#     print state, Q.getActionWithoutExploring(state), V.pi[state]
+
+#############################################################
+# 3d:
+# originalMDP.computeStates()
+# newThresholdMDP.computeStates()
+# V = ValueIteration()
+# V.solve(originalMDP)
+# alg1 = util.FixedRLAlgorithm(V.pi)
+# vReward = util.simulate(newThresholdMDP, alg1, 30000, sort=True)
+
+# Q = QLearningAlgorithm(newThresholdMDP.actions, newThresholdMDP.discount(),
+#                        blackjackFeatureExtractor, 0.2)
+
+# qReward = util.simulate(newThresholdMDP, Q, 30000, sort=True)
+
+# print "Average from value iteration: ", str(sum(vReward)*1.0/len(vReward))
+# print "Average from Q-learning: ", str(sum(qReward)*1.0/len(qReward))
+

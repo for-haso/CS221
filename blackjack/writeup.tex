@@ -9,7 +9,7 @@
 \begin{tabular}{rl}
 SUNet ID: & nisham\\
 Name: & Nisha Masharani \\
-Collaborators: & 
+Collaborators: & sryoung \\
 \end{tabular}
 \end{center}
 
@@ -17,20 +17,15 @@ By turning in this assignment, I agree by the Stanford honor code and declare
 that all of this is my own work.
 
 \section*{Problem 1}
-
-\begin{enumerate}[label=(\alph*)]
-  \item TODO
-\end{enumerate}
+For part f, see code. 
 
 \section*{Problem 3}
 
 \begin{enumerate}[label=(\alph*)]
   \item See code.
-  \item For smallMDP, they only produce a different action for one state:
-  \begin{verbatim}
-(5, 1, (2, 1)) Quit Take
-  \end{verbatim}
-  However, for largeMDP, 
+  \item For smallMDP, they only produce a different action for one state out of the 27 explored (~4\%). However, for largeMDP, out of the 2746 states explored, 885 were different (~36\%). In this case, the policy explored by value iteration occasionally selects peek as the optimal action, while the Q-learning policy never chooses peek as the optimal action. This is because value iteration is trying determine the optimal action $\pi(s)$ to maximize the expected utility $V_\pi(s)$, and is then using $V_\pi(s)$ to modify $\pi(s)$, which means that, when the value stops changing, the policy is the optimal policy for those values and vice versa. This does not necessarily minimize the cost or maximize the reward of each step through the MDP, but instead only optimizes the final utility. However, the Q-learning policy looks at the reward of each individual step, so when the reward is negative (peeking), the weight of that action goes downward because r < 0, so that action is not weighted the most heavily, and thus does not have the maximum Q out of all possible actions. Similarly, the Q-learning algorithm is also more likely to continue taking even when the risk is high (when the sum of cards held is almost at the threshhold), because the higher possible payoff is weighted more heavily, because the reward is greater in the future.
+  \item See code.
+  \item For performing value iteration on originalMDP and then solving newThresholdMDP with the policy from the value iteration, I get that the average reward is 6.83976666667. However, when I run newThresholdMDP with Q-learning, I get an average reward of 8.9754. This is because in originalMDP, the most optimal action is never one that takes the total number of cards in the hand over the threshold, because then the reward is 0. Therefore, when this policy is applied to an MDP with a higher threshold, the optimal choice as given by the originalMDP policy might be to quit when the count of cards in the hand = 9, while the actual optimal choice would be to draw another card. Q-iteration, on the other hand, comes up with closer to optimal choices for newThresholdMDP because it is optimizing under the correct constraints for the problem, instead of constraints that are too small. 
 \end{enumerate}
 
 \end{document}
