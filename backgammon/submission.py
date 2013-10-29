@@ -15,7 +15,16 @@ def simpleEvaluation(state, evalArgs=None):
     @returns V : (scalar) evaluation of current game state
     """
     # BEGIN_YOUR_CODE (around 9 lines of code expected)
-    raise Exception("Not implemented yet")
+    game = state[0]
+    player = game.players[0]
+    numOffPieces = len(game.offPieces[player])
+    numBarPieces = len(game.barPieces[player])
+    numHomePieces = 0
+    for i in range(12, 16):
+        for j in range(len(game.grid[i])):
+            if game.grid[i][j] == player:
+                numHomePieces+=1
+    V = 10.0 * numOffPieces + 1.0 * numHomePieces - numBarPieces * 1.0/10.0
     # END_YOUR_CODE
     return V
 
@@ -63,9 +72,25 @@ class ReflexAgent(agent.Agent, object):
         #   a linear evaluation function.  For the simple evaluation
         #   this will be None.
         # BEGIN_YOUR_CODE (around 6 lines of code expected)
-        raise Exception("Not implemented yet")
+        max_v = None
+        max_a = None
+        for action in actions:
+            newGame = game.clone()
+            newGame.takeAction(action, self.player)
+            v = self.evaluationFunction((newGame, self.player), self.evaluationArgs)
+            if max_v != None:
+                if v > max_v:
+                    max_a = action
+                    max_v = v
+                elif v == max_v:
+                    if action > max_a:
+                        max_a = action
+            else:
+                max_v = v
+                max_a = action
+
         # END_YOUR_CODE
-        return action
+        return max_a
 
     def setWeights(self, w):
         """
@@ -77,6 +102,22 @@ class ReflexAgent(agent.Agent, object):
 # Problem 1c
 
 class ExpectimaxAgent(agent.Agent, object):
+
+    def getValue(self, game, player):
+        rolls = [(i, j) for i in range(1, game.die + 1) for j in range(1, game.die + 1)]
+        expectation = 0.0
+        for roll in rolls:
+            actions = game.getActions(roll, player)
+            v = 0.0
+            for action in actions:
+                newGame = game.clone()
+                newGame.takeAction(action, player)
+                v += self.evaluationFunction((newGame, game.opponent(player)), self.evaluationArgs)
+            if len(actions) != 0:
+                v *= 1.0/len(actions)
+            expectation += v * 1.0/len(rolls)
+        return expectation
+
 
     def getAction(self, actions, game):
         """
@@ -122,9 +163,27 @@ class ExpectimaxAgent(agent.Agent, object):
             return [(i, j) for i in range(1, game.die + 1) for j in range(1, game.die + 1)]
 
         # BEGIN_YOUR_CODE (around 20 lines of code expected)
-        raise Exception("Not implemented yet")
+        rolls = allDiceRolls(game)
+        numRolls = len(rolls)
+        max_v = None
+        max_a = None
+        for action in actions:
+            newGame = game.clone()
+            newGame.takeAction(action, self.player)
+            v = self.getValue(newGame, game.opponent(self.player))
+            if max_v != None:
+                if v > max_v:
+                    max_a = action
+                    max_v = v
+                elif v == max_v:
+                    if action > max_a:
+                        max_a = action
+            else:
+                max_v = v
+                max_a = action
+
         # END_YOUR_CODE
-        return action
+        return max_a
 
 
     def __init__(self, player, evalFn, evalArgs=None):

@@ -182,7 +182,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
 			else:
 				max_v = v
 				max_a = action
-		print max_v
 		return max_a
 		# END_YOUR_CODE
 
@@ -299,7 +298,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		for action in actions:
 			nextState = gameState.generateSuccessor(player, action)
 			expectation += self.getValue(nextState, depth, (player + 1) % numAgents)
-		return expectation * 1.0 / len(actions)
+		return expectation / len(actions)
 
 
 	def getAction(self, gameState):
@@ -331,7 +330,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 			else:
 				max_v = v
 				max_a = action
-		print max_v
 		return max_a
 		# END_YOUR_CODE
 
