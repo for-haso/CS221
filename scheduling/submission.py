@@ -234,7 +234,20 @@ class BacktrackingSearch():
             # Heuristic: most constrained variable (MCV)
             # Select a variable with the least number of remaining domain values.
             # BEGIN_YOUR_CODE (around 7 lines of code expected)
-            raise Exception("Not implemented yet")
+            min_var = None
+            min_vals = None
+            for var in xrange(len(assignment)):
+                if assignment[var] is None:
+                    ordered_values = self.get_ordered_values(assignment, var)
+                    vals = 0
+                    for val in ordered_values:
+                        deltaWeight = self.get_delta_weight(assignment, var, val)
+                        if deltaWeight != 0:
+                            vals+=1
+                    if min_vals == None or min_vals > vals:
+                        min_vals = vals
+                        min_var = var
+            return min_var
             # END_YOUR_CODE
 
     def get_ordered_values(self, assignment, var):
@@ -259,7 +272,31 @@ class BacktrackingSearch():
             # Return value indices in ascending order of the number of additional
             # constraints imposed on unassigned neighboring variables.
             # BEGIN_YOUR_CODE (around 15 lines of code expected)
-            raise Exception("Not implemented yet")
+            values = self.domains[var]
+            neighbors = self.csp.binaryPotentials[var]
+
+            neighbor_values = []
+
+            for n in neighbors:
+                vals = []
+                for i in range(len(values)):
+                    count = 0
+                    for j in range(len(neighbors[n][i])):
+                        if neighbors[n][i][j] != 0.0:
+                            count += 1
+                    vals.append((values[i], count))
+                neighbor_values.append(vals)
+
+            max_sum = None
+            max_list = None
+            for nv in neighbor_values:
+                curSum = sum([n[1] for n in nv])
+                if max_sum == None or curSum > max_sum:
+                    max_sum = curSum
+                    max_list = nv
+
+            max_list.sort(key=lambda tup: tup[1])
+            return [elem[0] for elem in max_list]
             # END_YOUR_CODE
 
     def arc_consistency_check(self, var):
