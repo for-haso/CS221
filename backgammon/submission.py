@@ -1,4 +1,4 @@
-import agent
+import agent, math
 
 
 ############################################################
@@ -227,8 +227,35 @@ def extractFeatures(state):
     game.players - list of players 1 and 2 in order
     """
     # BEGIN_YOUR_CODE (around 20 lines of code expected)
-    raise Exception("Not implemented yet")
-    # END_YOUR_CODE
+    game = state[0]
+    features = []
+    for player in game.players:
+        for i in range(len(game.grid)):
+            count = 0
+            for j in range(len(game.grid[i])):
+                if game.grid[i][j] == player:
+                    count += 1
+            if count >= 1:
+                features.append(1)
+            else:
+                features.append(0)
+            if count >= 2:
+                features.append(1)
+            else:
+                features.append(0)
+            if count >= 3:
+                features.append(count - 2)
+            else:
+                features.append(0)
+        features.append(len(game.barPieces[player]))
+        features.append(len(game.offPieces[player]) * 1.0/game.numPieces[player])
+    if state[1] == game.players[0]:
+        features.append(1)
+        features.append(0)
+    else:
+        features.append(0)
+        features.append(1)
+    features.append(1)
     return features
 
 
@@ -249,7 +276,11 @@ def logLinearEvaluation(state, w):
     @returns V : Evaluation of current game state.
     """
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    raise Exception("Not implemented yet")
+    if state == None:
+        return 0.0
+    phi = extractFeatures(state)
+    z = sum([phi[i] * weight for i, weight in enumerate(w)])
+    V = 1 / (1 + math.exp(-1 * z))
     # END_YOUR_CODE
     return V
 
@@ -274,6 +305,12 @@ def TDUpdate(state, nextState, reward, w, eta):
     @returns w : Updated weights.
     """
     # BEGIN_YOUR_CODE (around 13 lines of code expected)
-    raise Exception("Not implemented yet")
+    r = reward + logLinearEvaluation(nextState, w) - logLinearEvaluation(state, w)
+    phi = extractFeatures(state)
+    z = sum([phi[i] * weight for i, weight in enumerate(w)])
+    gradient = [phi[i] * math.exp(z)/((1 + math.exp(z)) ** 2) for i, weight in enumerate(w)]
+    print gradient
+    for i in range(len(w)):
+        w[i] = w[i] + eta * r * gradient[i]
     # END_YOUR_CODE
     return w
