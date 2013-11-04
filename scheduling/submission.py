@@ -280,12 +280,12 @@ class BacktrackingSearch():
 
             for n in neighbors:
                 vals = []
-                for i in range(len(values)):
+                for i in values:
                     count = 0
                     for j in range(len(neighbors[n][i])):
                         if neighbors[n][i][j] != 0.0:
                             count += 1
-                    vals.append((values[i], count))
+                    vals.append((i, count))
                 neighbor_values.append(vals)
 
             max_sum = None
@@ -317,14 +317,16 @@ class BacktrackingSearch():
             queue.remove(x)
             neighbors = self.csp.binaryPotentials[x]
             vals = self.domains[x]
-            for i in vals:
-                for n in neighbors:
-                    nvals = copy.deepcopy(self.domains[n])
+            for n in neighbors:
+                nvals = copy.deepcopy(self.domains[n])
+                domain = set()
+                for i in vals:
                     for j in nvals:
-                        if neighbors[n][i][j] == 0.0:
-                            self.domains[n].remove(j)
-                            if n not in queue:
-                                queue.append(n)
+                        if neighbors[n][i][j] != 0.0:
+                            domain.add(j)
+                if len(domain) != len(nvals):
+                    queue.append(n)
+                self.domains[n] = list(domain)
 
 
 ############################################################
