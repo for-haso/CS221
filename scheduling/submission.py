@@ -211,8 +211,58 @@ class BacktrackingSearch():
             # Problem 1e
             # When arc consistency check is enabled.
             # BEGIN_YOUR_CODE (around 10 lines of code expected)
-            raise Exception("Not implemented yet")
+            cur_domains = copy.deepcopy(self.domains)
+            queue = []
+
+            neighbors = self.csp.binaryPotentials[var]
+            values = self.get_ordered_values(assignment, var)
+            for i in ordered_values:
+                deltaWeight = self.get_delta_weight(assignment, var, i)
+                if deltaWeight > 0:
+                    self.domains = copy.deepcopy(cur_domains)
+                    self.domains[var] = [i]
+                    # change domains
+                    for n in neighbors:
+                        domain = []
+                        for j in range(len(neighbors[n][i])):
+                            if neighbors[n][i][j] != 0:
+                                domain.append(j)
+                            else:
+                                if n not in queue:
+                                    queue.append(n)
+                        self.domains[n] = domain
+                    self.DoAC3(assignment, queue)
+                    assignment[var] = i
+                    self.backtrack(assignment, numAssigned + 1, weight * deltaWeight)
+                    assignment[var] = None
             # END_YOUR_CODE
+
+    def DoAC3(self, assignment, queue):
+        if len(queue) == 0:
+            return
+        var = queue[0]
+        if self.arc_consistency_check(var):
+            return
+        queue.remove(var)
+
+        neighbors = self.csp.binaryPotentials[var]
+        values = self.get_ordered_values(assignment, var)
+
+        for i in ordered_values:
+            deltaWeight = self.get_delta_weight(assignment, var, i)
+            if deltaWeight > 0:
+                self.domains = copy.deepcopy(cur_domains)
+                self.domains[var] = [i]
+                # change domains
+                for n in neighbors:
+                    domain = []
+                    for j in range(len(neighbors[n][i])):
+                        if neighbors[n][i][j] != 0:
+                            domain.append(j)
+                        else:
+                            if n not in queue:
+                                queue.append(n)
+                    self.domains[n] = domain
 
     def get_unassigned_variable(self, assignment):
         """
@@ -310,7 +360,7 @@ class BacktrackingSearch():
         function if there's a need.
         """
         # BEGIN_YOUR_CODE (around 17 lines of code expected)
-        raise Exception("Not implemented yet")
+        return True
         # END_YOUR_CODE
 
 
