@@ -26,16 +26,10 @@ def create_nqueens_csp(n = 8):
     for q1 in queens:
         for q2 in queens:
             if q1 != q2:
+                csp.add_binary_potential(q1, q2, lambda x, y : x[0] != y[0])
                 csp.add_binary_potential(q1, q2, lambda x, y : x[1] != y[1])
-                for i in range(n):
-                    csp.add_binary_potential(q1, q2, lambda x, y : 
-                                             x[0] - i != y[0] or x[1] - i != y[1])
-                    csp.add_binary_potential(q1, q2, lambda x, y : 
-                                             x[0] + i != y[0] or x[1] + i != y[1])
-                    csp.add_binary_potential(q1, q2, lambda x, y : 
-                                             x[0] - i != y[0] or x[1] + i != y[1])
-                    csp.add_binary_potential(q1, q2, lambda x, y : 
-                                             x[0] + i != y[0] or x[1] - i != y[1])
+                csp.add_binary_potential(q1, q2, lambda x, y : 
+                                         abs(x[0] - y[0]) != abs(x[1] - y[1]))
     # END_YOUR_CODE
     return csp
 
@@ -211,58 +205,15 @@ class BacktrackingSearch():
             # Problem 1e
             # When arc consistency check is enabled.
             # BEGIN_YOUR_CODE (around 10 lines of code expected)
-            cur_domains = copy.deepcopy(self.domains)
-            queue = []
-
-            neighbors = self.csp.binaryPotentials[var]
-            values = self.get_ordered_values(assignment, var)
-            for i in ordered_values:
-                deltaWeight = self.get_delta_weight(assignment, var, i)
-                if deltaWeight > 0:
-                    self.domains = copy.deepcopy(cur_domains)
-                    self.domains[var] = [i]
-                    # change domains
-                    for n in neighbors:
-                        domain = []
-                        for j in range(len(neighbors[n][i])):
-                            if neighbors[n][i][j] != 0:
-                                domain.append(j)
-                            else:
-                                if n not in queue:
-                                    queue.append(n)
-                        self.domains[n] = domain
-                    self.DoAC3(assignment, queue)
-                    assignment[var] = i
-                    self.backtrack(assignment, numAssigned + 1, weight * deltaWeight)
-                    assignment[var] = None
+            cur_domain = copy.deepcopy(self.domains)
+            for val in ordered_values:
+                self.domains = copy.deepcopy(cur_domain)
+                assignment[var] = val
+                self.domains[var] = [val]
+                self.arc_consistency_check(var)
+                self.backtrack(assignment, numAssigned + 1, weight)
+                assignment[var] = None
             # END_YOUR_CODE
-
-    def DoAC3(self, assignment, queue):
-        if len(queue) == 0:
-            return
-        var = queue[0]
-        if self.arc_consistency_check(var):
-            return
-        queue.remove(var)
-
-        neighbors = self.csp.binaryPotentials[var]
-        values = self.get_ordered_values(assignment, var)
-
-        for i in ordered_values:
-            deltaWeight = self.get_delta_weight(assignment, var, i)
-            if deltaWeight > 0:
-                self.domains = copy.deepcopy(cur_domains)
-                self.domains[var] = [i]
-                # change domains
-                for n in neighbors:
-                    domain = []
-                    for j in range(len(neighbors[n][i])):
-                        if neighbors[n][i][j] != 0:
-                            domain.append(j)
-                        else:
-                            if n not in queue:
-                                queue.append(n)
-                    self.domains[n] = domain
 
     def get_unassigned_variable(self, assignment):
         """
@@ -360,8 +311,20 @@ class BacktrackingSearch():
         function if there's a need.
         """
         # BEGIN_YOUR_CODE (around 17 lines of code expected)
-        return True
-        # END_YOUR_CODE
+        queue = [var]
+        while len(queue) != 0:
+            x = queue[0]
+            queue.remove(x)
+            neighbors = self.csp.binaryPotentials[x]
+            vals = self.domains[x]
+            for i in vals:
+                for n in neighbors:
+                    nvals = copy.deepcopy(self.domains[n])
+                    for j in nvals:
+                        if neighbors[n][i][j] == 0.0:
+                            self.domains[n].remove(j)
+                            if n not in queue:
+                                queue.append(n)
 
 
 ############################################################

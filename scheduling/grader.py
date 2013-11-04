@@ -62,12 +62,21 @@ grader.addBasicPart('1d-0', test1d)
 
 def test1e_0():
     acSolver = submission.BacktrackingSearch()
+    acSolver.solve(submission.create_nqueens_csp(8), mac = True)
+    grader.requireIsEqual(92, acSolver.numOptimalAssignments)
+    grader.requireIsEqual(21, acSolver.firstAssignmentNumOperations)
+    grader.requireIsLessThan(1000, acSolver.numOperations)
+
+grader.addBasicPart('1e-0', test1e_0)
+
+def test1e_1():
+    acSolver = submission.BacktrackingSearch()
     acSolver.solve(submission.create_nqueens_csp(8), mcv = True, lcv = True, mac = True)
     grader.requireIsEqual(92, acSolver.numOptimalAssignments)
     grader.requireIsLessThan(20, acSolver.firstAssignmentNumOperations)
     grader.requireIsLessThan(1000, acSolver.numOperations)
 
-grader.addBasicPart('1e-0', test1e_0)
+grader.addBasicPart('1e-1', test1e_1)
 
 
 
@@ -272,10 +281,9 @@ def valid_profile_txt():
     try:
         profile = util.Profile(bulletin, 'profile.txt')
     except:
-        print 'profile.txt is not valid'
-        grader.fail()
+        grader.fail('profile.txt is not valid')
     grader.assignFullCredit()
 
-grader.addBasicPart('profile.txt', valid_profile_txt)
+grader.addBasicPart('profile.txt', valid_profile_txt, 0)
 
 grader.grade()
