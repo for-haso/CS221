@@ -357,6 +357,10 @@ def get_or_variable(csp, name, variables, value):
 
     # BEGIN_YOUR_CODE (around 20 lines of code expected)
     prefix = "or" + name
+    if len(variables) == 0:
+        final_prefix = prefix + "final"
+        csp.add_variable(final_prefix, [False])
+        return final_prefix
     for i in range(len(variables)):
         aux = prefix + str(i) + "aux"
         csp.add_variable(aux, [(True, True), (True, False), (False, True), (False, False)])
@@ -394,6 +398,10 @@ def get_sum_variable(csp, name, variables, maxSum):
 
     # BEGIN_YOUR_CODE (around 18 lines of code expected)
     prefix = "sum" + name
+    if len(variables) == 0:
+        final_prefix = prefix + "final"
+        csp.add_variable(final_prefix, [0])
+        return final_prefix
     for i in range(len(variables)):
         aux = prefix + str(i) + "aux"
         csp.add_variable(aux, [(x,y) for x,y in product(range(maxSum + 1), range(maxSum + 1))])
@@ -534,15 +542,22 @@ class SchedulingCSPConstructor():
         @param csp: The CSP where the additional constraints will be added to.
         """
         # BEGIN_YOUR_CODE (around 11 lines of code expected)
-        for req in self.profile.requests:
-            for i in range(1, len(self.profile.quarters)):
+        past = []
+        for i,quarter in enumerate(self.profile.quarters):
+            for req in self.profile.requests:
+                indicators = []
+                if i != 0:
+                    past += [(r, self.profile.quarters[i-1]) for r in self.profile.requests]
+                if len(req.prereqs) == 0:
+                    continue
                 for prereq in req.prereqs:
-                    variables = []
-                    for preq in self.profile.requests:
-                        variables += [(preq, q) for q in self.profile.quarters[:i]]
-                    csp.add_unary_potential((req, self.profile.quarters[i]), 
-                                            lambda x: get_or_variable(csp, "prereq_constraints", variables, prereq))
-
+                    final = get_or_variable(csp, str(req) + prereq + str(i), past, prereq)
+                    indicators.append(final)
+                    csp.add_binary_potential((req, quarter), final,
+                                             lambda x, y: y or x == None)
+                csp.add_binary_potential((req, quarter), 
+                                         get_or_variable(csp, str(req) + str(i), indicators, False),
+                                         lambda x, y: (not y) or x == None)
         # END_YOUR_CODE
 
     def add_unit_constraints(self, csp):
