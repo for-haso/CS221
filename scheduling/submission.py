@@ -576,7 +576,23 @@ class SchedulingCSPConstructor():
         @param csp: The CSP where the additional constraints will be added to.
         """
         # BEGIN_YOUR_CODE (around 16 lines of code expected)
-        raise Exception("Not implemented yet")
+        for quarter in self.profile.quarters:
+            quarter_variables = []
+            for req in self.profile.requests:
+                for cid in req.cids:
+                    csp.add_variable((cid, quarter), 
+                                     [0] + range(self.bulletin.courses[cid].minUnits, self.bulletin.courses[cid].maxUnits))
+                    quarter_variables.append((cid, quarter))
+                    csp.add_binary_potential((req, quarter), (cid, quarter), 
+                                             lambda x, y:
+                                             (y <= self.bulletin.courses[cid].maxUnits and
+                                              y >= self.bulletin.courses[cid].minUnits)
+                                             if x == cid else y == 0)
+            quarter_max_sum = get_sum_variable(csp, "quarter" + quarter, 
+                                               quarter_variables, 
+                                               self.profile.maxUnits)
+            csp.add_unary_potential(quarter_max_sum, lambda x: x >= self.profile.minUnits and x <= self.profile.minUnits)
+
         # END_YOUR_CODE
 
     def add_all_additional_constraints(self, csp):
