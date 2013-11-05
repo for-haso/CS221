@@ -1,4 +1,5 @@
 import collections, util, copy
+from itertools import product
 
 ############################################################
 # Problem 1a
@@ -355,7 +356,20 @@ def get_or_variable(csp, name, variables, value):
     """
 
     # BEGIN_YOUR_CODE (around 20 lines of code expected)
-    raise Exception("Not implemented yet")
+    prefix = "or" + name
+    for i in range(len(variables)):
+        aux = prefix + str(i) + "aux"
+        csp.add_variable(aux, [(True, True), (True, False), (False, True), (False, False)])
+        csp.add_binary_potential(variables[i], aux, lambda x, y: y[1] == ((x == value) or y[0]))
+        if i > 0:
+            csp.add_binary_potential(aux, prefix + str(i-1) + "aux", lambda x, y: x[0] == y[1])
+        else:
+            csp.add_unary_potential(aux, lambda x: not x[0])
+    last_prefix = prefix + str(len(variables) - 1) + "aux"
+    final_prefix = prefix + "final"
+    csp.add_variable(final_prefix, [True, False])
+    csp.add_binary_potential(last_prefix, final_prefix, lambda x, y: y == x[1])
+    return final_prefix
     # END_YOUR_CODE
 
 def get_sum_variable(csp, name, variables, maxSum):
@@ -379,7 +393,20 @@ def get_sum_variable(csp, name, variables, maxSum):
     """
 
     # BEGIN_YOUR_CODE (around 18 lines of code expected)
-    raise Exception("Not implemented yet")
+    prefix = "sum" + name
+    for i in range(len(variables)):
+        aux = prefix + str(i) + "aux"
+        csp.add_variable(aux, [(x,y) for x,y in product(range(maxSum + 1), range(maxSum + 1))])
+        csp.add_binary_potential(variables[i], aux, lambda x,y: y[1] == y[0] + x)
+        if i > 0:
+            csp.add_binary_potential(aux, prefix + str(i-1) + "aux", lambda x,y: x[0]== y[1])
+        else:
+            csp.add_unary_potential(aux, lambda x: x[0] == 0)
+    last_prefix = prefix + str(len(variables) - 1) + "aux"
+    final_prefix = prefix + "final"
+    csp.add_variable(final_prefix, range(maxSum + 1))
+    csp.add_binary_potential(last_prefix, final_prefix, lambda x, y: y == x[1])
+    return final_prefix
     # END_YOUR_CODE
 
 
@@ -467,7 +494,11 @@ class SchedulingCSPConstructor():
         @param csp: The CSP where the additional constraints will be added to.
         """
         # BEGIN_YOUR_CODE (around 5 lines of code expected)
-        raise Exception("Not implemented yet")
+        for req in self.profile.requests:
+            if req.quarters == None or req.quarters == []: continue
+            for quarter in self.profile.quarters:
+                if quarter not in req.quarters:
+                    csp.add_unary_potential((req, quarter), lambda x: x == None)
         # END_YOUR_CODE
 
     def add_request_weights(self, csp):
@@ -480,7 +511,9 @@ class SchedulingCSPConstructor():
         @param csp: The CSP where the additional constraints will be added to.
         """
         # BEGIN_YOUR_CODE (around 4 lines of code expected)
-        raise Exception("Not implemented yet")
+        for req in self.profile.requests:
+            for quarter in self.profile.quarters:
+                csp.add_unary_potential((req, quarter), lambda x: req.weight if x != None else 1)
         # END_YOUR_CODE
 
 
@@ -501,7 +534,15 @@ class SchedulingCSPConstructor():
         @param csp: The CSP where the additional constraints will be added to.
         """
         # BEGIN_YOUR_CODE (around 11 lines of code expected)
-        raise Exception("Not implemented yet")
+        for req in self.profile.requests:
+            for i in range(1, len(self.profile.quarters)):
+                for prereq in req.prereqs:
+                    variables = []
+                    for preq in self.profile.requests:
+                        variables += [(preq, q) for q in self.profile.quarters[:i]]
+                    csp.add_unary_potential((req, self.profile.quarters[i]), 
+                                            lambda x: get_or_variable(csp, "prereq_constraints", variables, prereq))
+
         # END_YOUR_CODE
 
     def add_unit_constraints(self, csp):
