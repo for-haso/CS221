@@ -581,13 +581,10 @@ class SchedulingCSPConstructor():
             for req in self.profile.requests:
                 for cid in req.cids:
                     csp.add_variable((cid, quarter), 
-                                     [0] + range(self.bulletin.courses[cid].minUnits, self.bulletin.courses[cid].maxUnits))
+                                     [0] + range(self.bulletin.courses[cid].minUnits, self.bulletin.courses[cid].maxUnits + 1))
                     quarter_variables.append((cid, quarter))
                     csp.add_binary_potential((req, quarter), (cid, quarter), 
-                                             lambda x, y:
-                                             (y <= self.bulletin.courses[cid].maxUnits and
-                                              y >= self.bulletin.courses[cid].minUnits)
-                                             if x == cid else y == 0)
+                                             lambda x, y: y > 0 if x == cid else y == 0)
             quarter_max_sum = get_sum_variable(csp, "quarter" + quarter, 
                                                quarter_variables, 
                                                self.profile.maxUnits)
