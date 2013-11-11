@@ -72,32 +72,42 @@ def computeViterbi(crf, xs):
     """
 
     # BEGIN_YOUR_CODE (around 27 lines of code expected)
-    viterbis = []
-    prev_viterbi = dict()
-    prev_viterbi[BEGIN_TAG] = 1
-    viterbis.append(prev_viterbi)
+    viterbis = [None] * len(xs)
     for i in range(len(xs)):
-        viterbi = dict()
+        viterbis[i] = Counter()
         total = 0
-        prev_viterbi = viterbis[i]
-        for tag in crf.TAGS:
-            viterbi[tag] = max([prev_viterbi[t]*crf.G(i, t, tag, xs) for t in crf.TAGS + [BEGIN_TAG] if t in prev_viterbi])
-            total += viterbi[tag]
-        for tag in crf.TAGS:
-            viterbi[tag] = viterbi[tag] / total
-        viterbis.append(copy.deepcopy(viterbi))
+        if i > 0:
+            prev_viterbi = viterbis[i-1]
+            for tag in crf.TAGS:
+                viterbis[i][tag] = max([prev_viterbi[t]*crf.G(i, t, tag, xs) for t in crf.TAGS if t in prev_viterbi])
+                total += viterbis[i][tag]
+            for tag in crf.TAGS:
+                viterbis[i][tag] = viterbis[i][tag] / total
+        else:
+            for tag in crf.TAGS:
+                viterbis[i][tag] = crf.G(i, BEGIN_TAG, tag, xs)
+                total += viterbis[i][tag]
+            for tag in crf.TAGS:
+                viterbis[i][tag] = viterbis[i][tag] / total
 
-    types = []
-    for i in reversed(range(1, len(xs) + 1)):
-        viterbi = viterbis[i]
+    types = [None] * len(xs)
+    for i in range(len(xs))[::-1]:
         max_y = None
         max_v = None
-        for y in crf.TAGS:
-            if max_v == None or viterbi[y] > max_v:
-                max_v = viterbi[y]
-                max_y = y
-        types.append(max_y)
-    return types[::-1]
+        if i == len(xs) - 1:
+            for y in crf.TAGS:
+                v = viterbis[i][y]
+                if max_v == None or v > max_v:
+                    max_v = v
+                    max_y = y
+        else:
+            for y in crf.TAGS:
+                v = viterbis[i][y] * crf.G(i, y, types[i+1], xs)
+                if max_v == None or v > max_v:
+                    max_v = v
+                    max_y = y
+        types[i] = max_y
+    return types
     # END_YOUR_CODE
 
 ####################################################3
