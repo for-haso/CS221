@@ -238,7 +238,24 @@ def computeEdgeMarginals(crf, xs):
     T = [ None for _ in xrange( len(xs) ) ]
 
     # BEGIN_YOUR_CODE (around 17 lines of code expected)
-    raise Exception("Not implemented yet")
+    for t in range(len(xs)):
+        T[t] = Counter()
+        total = 0.0
+        for y_t in crf.TAGS:
+            if t > 0:
+                for y_prev in crf.TAGS:
+                    T[t][(y_prev, y_t)] = (forward[t-1][y_prev] * crf.G(t, y_prev, y_t, xs) * backward[t][y_t])
+                    total += T[t][(y_prev, y_t)]
+            else:
+                T[t][(BEGIN_TAG, y_t)] = (crf.G(t, BEGIN_TAG, y_t, xs) * backward[t][y_t])
+                total += T[t][(BEGIN_TAG, y_t)]
+        for y_t in crf.TAGS:
+            if t > 0:
+                for y_prev in crf.TAGS:
+                    T[t][(y_prev, y_t)] = T[t][(y_prev, y_t)]/total
+            else:
+                T[t][(BEGIN_TAG, y_t)] = T[t][(BEGIN_TAG, y_t)]/total
+
     # END_YOUR_CODE
 
     return T
