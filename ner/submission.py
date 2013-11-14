@@ -4,7 +4,7 @@ Owner: Arun Chaganty
 """
 
 import itertools as it
-import math, random
+import math, random, string
 
 from collections import Counter
 
@@ -307,6 +307,13 @@ def binaryFeatureFunction(t, y_, y, xs):
 
     return phi
 
+CAPITAL_TAG = "-CAPITALIZED-"
+PRE_CAPITAL_TAG = "-PRE-CAPITALIZED-"
+POST_CAPITAL_TAG = "-POST-CAPITALIZED-"
+END_TAG = "-END-"
+PREV_TAG = "PREV:"
+NEXT_TAG = "NEXT:"
+
 #################################
 # Problem 2a
 def nerFeatureFunction(t, y_, y, xs):
@@ -330,7 +337,36 @@ def nerFeatureFunction(t, y_, y, xs):
     - Counter
     """
     # BEGIN_YOUR_CODE (around 18 lines of code expected)
-    raise Exception("Not implemented yet")
+    phi = Counter()
+    phi += binaryFeatureFunction(t, y_, y, xs)
+
+    # check capitalization
+    if len(xs[t]) > 0 and xs[t][0] in string.ascii_uppercase:
+        phi[(y, CAPITAL_TAG)] = 1.0
+    else:
+        phi[(y, CAPITAL_TAG)] = 0.0
+    # prev word
+    if t > 0:
+        phi[(y, PREV_TAG + xs[t-1])] = 1.0
+    else:
+        phi[(y, PREV_TAG + BEGIN_TAG)] = 1.0
+    # next word
+    if t < len(xs) - 1:
+        phi[(y, NEXT_TAG + xs[t+1])] = 1.0
+    else:
+        phi[(y, NEXT_TAG + END_TAG)] = 1.0
+    # pre capitalized:
+    if t > 0 and len(xs[t-1]) > 0 and xs[t-1][0] in string.ascii_uppercase:
+        phi[(y, PRE_CAPITAL_TAG)] = 1.0
+    else:
+        phi[(y, PRE_CAPITAL_TAG)] = 0.0
+    # post capitalized
+    if t < len(xs) - 1 and len(xs[t+1]) > 0 and xs[t+1][0] in string.ascii_uppercase:
+        phi[(y, POST_CAPITAL_TAG)] = 1.0
+    else:
+        phi[(y, POST_CAPITAL_TAG)] = 0.0
+
+    return phi
     # END_YOUR_CODE
 
 #################################
@@ -442,7 +478,23 @@ def chooseGibbsCRF(crf, t, xs, ys ):
       probability and 'd' with 10% probability.
     """
     # BEGIN_YOUR_CODE (around 17 lines of code expected)
-    raise Exception("Not implemented yet")
+    probabilities = dict()
+    total = 0.
+    for tag in crf.TAGS:
+        p = None
+        if t < 1:
+            p = crf.G(t, BEGIN_TAG, tag, xs) * crf.G(t+1, tag, ys[t+1], xs)
+        elif t >= len(xs) -1:
+            p = crf.G(t, ys[t-1], tag, xs)
+        else:
+            p = crf.G(t, ys[t-1], tag, xs) * crf.G(t+1, tag, ys[t+1], xs)
+        probabilities[tag] = p
+        total += p
+    
+    for tag in crf.TAGS:
+        probabilities[tag] = probabilities[tag]/total
+
+    ys[t] = util.multinomial(probabilities)
     # END_YOUR_CODE
 
 #################################
@@ -472,7 +524,12 @@ def computeGibbsProbabilities(crf, blocksFunction, choiceFunction, xs, samples =
     * gibbsRun
     """
     # BEGIN_YOUR_CODE (around 2 lines of code expected)
-    raise Exception("Not implemented yet")
+    generated = gibbsRun(crf, blocksFunction, choiceFunction, xs, samples)
+    counts = Counter(generated)
+    total = sum(counts.values()) * 1.0
+    for k in counts.keys():
+        counts[k] = counts[k]/total
+    return counts
     # END_YOUR_CODE
 
 #################################
@@ -492,7 +549,8 @@ def computeGibbsBestSequence(crf, blocksFunction, choiceFunction, xs, samples = 
     * gibbsRun
     """
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    counts = Counter(gibbsRun(crf, blocksFunction, choiceFunction, xs, samples))
+    return counts.most_common(1)[0][0]
     # END_YOUR_CODE
             
 #################################

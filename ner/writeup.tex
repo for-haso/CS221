@@ -1,0 +1,35 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx}
+
+\begin{document}
+
+\begin{center}
+{\Large CS221 Fall 2013 ner}
+
+\begin{tabular}{rl}
+SUNet ID: & nisham \\
+Name: & Nisha Masharani \\
+Collaborators: & 
+\end{tabular}
+\end{center}
+
+By turning in this assignment, I agree by the Stanford honor code and declare
+that all of this is my own work.
+
+\section*{Problem 3}
+
+\begin{enumerate}[label=(\alph*)]
+  \item The treewidth is 2, because both $y_5$ and $y_10$ have potentials with $y_4$, so when $y_4$ is eliminated, the potential created has arity 2. All other potentials created by variable elimination in this case have arity 1.\\
+  The variable elimination order eliminates the variables with the fewest neighbors first. So, $y_1$ through $y_3$ will be eliminated, then $y_5$ through $y_9$ will be eliminated, then $y_10$ will be eliminated, then $y_4$ and $y_10$ will be eliminated.
+  \item 
+  \begin{eqnarray*}
+  p(y | x; \theta) &=& \frac{1}{Z(x;\theta)} \prod_{i = 1}^T G_i(y_{i-1}, y_i| x; \theta)\\
+  p(y_t | y_{-t}, x; \theta) &=& \frac{p(y_t, y_{-t} | x; \theta)}{p(y_{-t}| x; \theta)}\\
+  &=& \frac{p(y | x; \theta)}{p(y_{-t}| x; \theta)}\\
+  &=& \frac{\frac{1}{Z(x;\theta)} \prod_{i = 1}^T G_i(y_{i-1}, y_i| x; \theta)}{\frac{1}{Z(x;\theta)} \prod_{i = 1, i \notin \{t, t+1\}}^T G_i(y_{i-1}, y_i| x; \theta)}\\
+  &=& G_t(y_{t-1}, y_t | x; \theta) G_{t+1}(y_t, y_{t+1} | x; \theta)\\
+  \end{eqnarray*}
+  Edge case: if $t = T$, then $p(y_t | y_{-t}, x; \theta) = G_t(y_{t-1}, y_t | x; \theta)$. Similarly, if $t = 1$, then $y_{t-1} = BEGIN\_TAG$ .\\
+\end{enumerate}
+
+\end{document}

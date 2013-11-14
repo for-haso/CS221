@@ -203,7 +203,7 @@ def part3c_0():
     The sample distribution and exact distribution should match fairly closely.
     """
     xs = exampleInput
-    N = 3000
+    N = 10000
 
     difference = 0.0
     for ys, estimatedProb in submission.computeGibbsProbabilities( simpleCRF, 
@@ -213,7 +213,7 @@ def part3c_0():
         trueProb = nerUtils.computeProbability( simpleCRF, xs, ys )
         difference = abs( trueProb - estimatedProb )
         grader.requireIsLessThan( 5e-2, difference )
-grader.addBasicPart('3c-0', part3c_0, 0)
+grader.addBasicPart('3c-0', part3c_0, 0, 3)
 
 def part3c_1():
     """
@@ -221,7 +221,7 @@ def part3c_1():
     """
     xs = exampleInput
     ys = exampleTags
-    N = 1000
+    N = 10000
 
     ys_ = submission.computeGibbsBestSequence(
             simpleCRF,
@@ -230,7 +230,7 @@ def part3c_1():
             xs, 
             N)
     grader.requireIsEqual( ys, ys_ )
-grader.addBasicPart('3c-1', part3c_1, 0)
+grader.addBasicPart('3c-1', part3c_1, 0, 4)
 
 def part3c_2():
     """
@@ -247,7 +247,7 @@ def part3c_2():
             submission.chooseGibbsCRF,
             xs, N )
     grader.requireIsTrue(True)
-grader.addBasicPart('3c-2', part3c_2, 0, 1)
+grader.addBasicPart('3c-2', part3c_2, 0, 2)
 
 
 
@@ -282,15 +282,16 @@ def part3e_1():
     ys = "-ORG- -ORG- -ORG- -O- -O- -O- -O- -ORG- -O- -O- -O- -O- -O- -O- -O-".split()
     assert len(xs) == len(ys)
 
-    N = 10000
-    ysLongRangeGibbs = submission.computeGibbsBestSequence(
+    N = 50000
+    ys_ = submission.computeGibbsBestSequence(
             englishCRF,
             submission.getLongRangeCRFBlocks,
             submission.chooseGibbsLongRangeCRF,
             xs, 
             N)
-    grader.requireIsEqual( ys, ysLongRangeGibbs )
-grader.addBasicPart('3e-1', part3e_1, 1)
+    grader.requireIsEqual( ys, ys_ )
+grader.addBasicPart('3e-1', part3e_1, 1, 8)
+
 
 
 if __name__ == "__main__":
