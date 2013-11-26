@@ -27,9 +27,19 @@ that all of this is my own work.
   p(y_t | y_{-t}, x; \theta) &=& \frac{p(y_t, y_{-t} | x; \theta)}{p(y_{-t}| x; \theta)}\\
   &=& \frac{p(y | x; \theta)}{p(y_{-t}| x; \theta)}\\
   &=& \frac{\frac{1}{Z(x;\theta)} \prod_{i = 1}^T G_i(y_{i-1}, y_i| x; \theta)}{\frac{1}{Z(x;\theta)} \prod_{i = 1, i \notin \{t, t+1\}}^T G_i(y_{i-1}, y_i| x; \theta)}\\
-  &=& G_t(y_{t-1}, y_t | x; \theta) G_{t+1}(y_t, y_{t+1} | x; \theta)\\
+  &=& \frac{1}{Z(x;\theta)} G_t(y_{t-1}, y_t | x; \theta) G_{t+1}(y_t, y_{t+1} | x; \theta)\\
   \end{eqnarray*}
-  Edge case: if $t = T$, then $p(y_t | y_{-t}, x; \theta) = G_t(y_{t-1}, y_t | x; \theta)$. Similarly, if $t = 1$, then $y_{t-1} = BEGIN\_TAG$ .\\
+  Edge case: if $t = T$, then $p(y_t | y_{-t}, x; \theta) = \frac{1}{Z(x;\theta)} G_t(y_{t-1}, y_t | x; \theta)$. Similarly, if $t = 1$, then $y_{t-1} = BEGIN\_TAG$ .\\
+  \item See code
+  \item 
+  \item 
+  \begin{eqnarray*}
+  p(y | x; \theta) &=& \frac{1}{Z(x;\theta)} \prod_{i = 1}^T G_i(y_{i-1}, y_i| x; \theta)\\
+  p(y_S | y_{-S}, x; \theta) &=& \frac{p(y_S, y_{-S} | x; \theta)}{p(y_{-S}| x; \theta)}\\
+  &=& \frac{p(y | x; \theta)}{p(y_{-t}| x; \theta)}\\
+  &=& \frac{\frac{1}{Z(x;\theta)} \prod_{i = 1}^T G_i(y_{i-1}, y_i| x; \theta)}{\frac{1}{Z(x;\theta)} \prod_{i = 1, i \notin S, i-1 \notin S}^T G_i(y_{i-1}, y_i| x; \theta)}\\
+  &=& \frac{1}{Z(x;\theta)} \prod_{s \in S} G_s(y_{s-1}, y_s | x; \theta) G_{s+1}(y_s, y_{s+1} | x; \theta)\\
+  \end{eqnarray*}
 \end{enumerate}
 
 \end{document}

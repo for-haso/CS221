@@ -290,7 +290,8 @@ def part3e_1():
             xs, 
             N)
     grader.requireIsEqual( ys, ys_ )
-grader.addBasicPart('3e-1', part3e_1, 1, 8)
+# grader.addBasicPart('3e-1', part3e_1, 1, 8)
+grader.addBasicPart('3e-1', part3e_1, 1, 20)
 
 
 

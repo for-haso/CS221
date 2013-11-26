@@ -565,7 +565,13 @@ def getLongRangeCRFBlocks(xs):
             Example: "A A B" would return: [[0,1],[2]].
     """
     # BEGIN_YOUR_CODE (around 7 lines of code expected)
-    raise Exception("Not implemented yet")
+    blocks = dict()
+    for i in range(len(xs)):
+        if xs[i] in blocks:
+            blocks[xs[i]] = blocks[xs[i]] + [i]
+        else:
+            blocks[xs[i]] = [i]
+    return blocks.values()
     # END_YOUR_CODE
 
 #################################
@@ -587,8 +593,26 @@ def chooseGibbsLongRangeCRF(crf, block, xs, ys ):
     * You should only use the potentials between y_t and its Markov
       blanket.
     """
+
     # BEGIN_YOUR_CODE (around 24 lines of code expected)
-    raise Exception("Not implemented yet")
+    probabilities = []
+    total = 0.
+    for tag in crf.TAGS:
+        p = 1.
+        for t in block:
+            if t < 1:
+                p *= crf.G(t, BEGIN_TAG, tag, xs) * crf.G(t+1, tag, ys[t+1], xs)
+            elif t >= len(xs) - 1:
+                p *= crf.G(t, ys[t-1], tag, xs)
+            else:
+                p *= crf.G(t, ys[t-1], tag, xs) * crf.G(t+1, tag, ys[t+1], xs)
+        probabilities.append(p)
+        total += p
+    
+    probabilities = [p/total for p in probabilities]
+    assignment = util.multinomial(probabilities)
+    for t in block:
+        ys[t] = crf.TAGS[assignment]
     # END_YOUR_CODE
 
 ######################
