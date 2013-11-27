@@ -72,7 +72,6 @@ def test3a_0():
     pf = particleFilter.ParticleFilter(30, 13)
 
     pf.observe(555, 193, 800)
-
     grader.requireIsEqual(0.015, pf.belief.getProb(20, 4))
     grader.requireIsEqual(0.135, pf.belief.getProb(21, 5))
     grader.requireIsEqual(0.85, pf.belief.getProb(22, 6))
@@ -96,7 +95,6 @@ def test3a_1():
     pf.elapseTime()
     grader.requireIsEqual(200, sum(pf.particles.values())) # Do not lose particles
     grader.requireIsEqual(66, len(pf.particles)) # Most particles lie on the same (row, col) locations
-
     grader.requireIsEqual(9, pf.particles[(3,9)])
     grader.requireIsEqual(0, pf.particles[(2,10)])
     grader.requireIsEqual(7, pf.particles[(8,4)])

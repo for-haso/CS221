@@ -70,7 +70,12 @@ class ParticleFilter(object):
     # which is called at the end of this function.
     def observe(self, agentX, agentY, observedDist):
         # BEGIN_YOUR_CODE (around 5 lines of code expected)
-        raise Exception("Not implemented yet")
+        for tile in self.particles:
+            x = util.colToX(tile[1])
+            y = util.rowToY(tile[0])
+            dist = math.sqrt((x - agentX) ** 2 + (y - agentY) ** 2)
+            p = util.pdf(observedDist, Const.SONAR_STD, dist) * self.particles[tile]
+            self.particles[tile] = p
         # END_YOUR_CODE
         self.resample()
 
@@ -90,7 +95,9 @@ class ParticleFilter(object):
     def resample(self):
         newParticles = collections.Counter()
         # BEGIN_YOUR_CODE (around 3 lines of code expected)
-        raise Exception("Not implemented yet")
+        for i in range(self.NUM_PARTICLES):
+            tile = util.weightedRandomChoice(self.particles)
+            newParticles[tile] = newParticles[tile] + 1
         # END_YOUR_CODE
         self.particles = newParticles
         self.updateBelief()
@@ -112,7 +119,10 @@ class ParticleFilter(object):
     def elapseTime(self):
         newParticles = collections.Counter()
         # BEGIN_YOUR_CODE (around 7 lines of code expected)
-        raise Exception("Not implemented yet")
+        for tile in self.particles:
+            for i in range(self.particles[tile]):
+                newTile = util.weightedRandomChoice(self.transProbDict[tile])
+                newParticles[newTile] = newParticles[newTile] + 1
         # END_YOUR_CODE
         self.particles = newParticles
       
