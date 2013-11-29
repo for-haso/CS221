@@ -28,13 +28,13 @@ def checkFormula(name, predForm, preconditionForm=None):
             grader.fail("Your formula (%s) says the following model is FALSE, but it should be TRUE:" % predForm)
             ok = False
             printModel(model)
-            return
+            # return
     for model in predModels:
         if hashkey(model) not in targetModelSet:
             grader.fail("Your formula (%s) says the following model is TRUE, but it should be FALSE:" % predForm)
             ok = False
             printModel(model)
-            return
+            # return
     grader.addMessage('You matched the %d models' % len(targetModels))
     grader.addMessage('Example model: %s' % rstr(targetModels[0]))
     grader.assignFullCredit()

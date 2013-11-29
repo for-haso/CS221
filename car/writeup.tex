@@ -1,0 +1,35 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage,enumitem,amsmath,amssymb,graphicx}
+
+\begin{document}
+
+\begin{center}
+{\Large CS221 Fall 2013 Homework 8: car}
+
+\begin{tabular}{rl}
+SUNet ID: & nisham \\
+Name: & Nisha Masharani \\
+Collaborators: & esclee, sryoung
+\end{tabular}
+\end{center}
+
+By turning in this assignment, I agree by the Stanford honor code and declare
+that all of this is my own work.
+
+\section*{Problem 4}
+
+\begin{enumerate}[label=(\alph*)]
+  \item 
+  \begin{eqnarray*}
+  p(c_{11}, c_{12} | e_1) &\propto& p(c_{11}, c_{12})p(e_1|c_{11}, c_{12})\\
+  &\propto& p(c_{11})p(c_{12})p(e_1|c_{11}, c_{12})\\
+  p(e_1|c_{11}, c_{12}) &=& \frac{1}{2}\left(p_{\mathcal N}(e_{11}; ||a_1 - c_{11}||, \sigma^2)p_{\mathcal N}(e_{12}; ||a_1 - c_{12}||, \sigma^2)\right) \\
+  &+& \frac{1}{2}\left(p_{\mathcal N}(e_{12}; ||a_1 - c_{11}||, \sigma^2)p_{\mathcal N}(e_{11}; ||a_1 - c_{12}||, \sigma^2)\right)\\
+  p(c_{11}, c_{12} | e_1) &\propto& p(c_{11})p(c_{12})\left[\frac{1}{2}\left(p_{\mathcal N}(e_{11}; ||a_1 - c_{11}||, \sigma^2)p_{\mathcal N}(e_{12}; ||a_1 - c_{12}||, \sigma^2)\right)\right. \\
+  &+& \left.\frac{1}{2}\left(p_{\mathcal N}(e_{12}; ||a_1 - c_{11}||, \sigma^2)p_{\mathcal N}(e_{11}; ||a_1 - c_{12}||, \sigma^2)\right)\right]
+  \end{eqnarray*}
+  \item If we want to maximize $p(c_{11}, \dots, c_{1K} \mid e_1)$, there is at least one set of locations $c_{11}, \dots, c_{1K}$ that will maximize this value by having all $c_{1i}$ such that the distance between $c_{1i}$ and $a_1$ uniquely is close to a $e_{1,j}$ in $e_1$. Since the probability for each car i to be at any location is constant, the cars at these optimal locations are interchangable. Therefore, we have $k$ locations, and $k$ cars, so there are $k!$ ways to put each of the cars into a location.
+  \item
+\end{enumerate}
+
+\end{document}

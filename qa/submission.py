@@ -13,7 +13,7 @@ def formula1a():
     California = Atom('California')       # whether we're in California
     Rain = Atom('Rain')                   # whether it's raining
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return Implies(And(Summer, California), Not(Rain))
     # END_YOUR_CODE
 
 # Sentence: "It's wet if and only if it is raining or the sprinklers are on."
@@ -23,7 +23,7 @@ def formula1b():
     Wet = Atom('Wet')                # whether it it wet
     Sprinklers = Atom('Sprinklers')  # whether the sprinklers are on
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return Equiv(Wet, Or(Rain, Sprinklers))
     # END_YOUR_CODE
 
 # Sentence: "It only snows in the summer."
@@ -33,7 +33,7 @@ def formula1c():
     Snow = Atom('Snow')            # whether it's snowing
     Summer = Atom('Summer')        # whether it's summer
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return Implies(Snow, Summer)
     # END_YOUR_CODE
 
 # Sentence: "Either it's day or night (but not both)."
@@ -42,7 +42,7 @@ def formula1d():
     Day = Atom('Day')     # whether it's day
     Night = Atom('Night') # whether it's night
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return And(Or(Day, Night), Not(And(Day, Night)))
     # END_YOUR_CODE
 
 ############################################################
@@ -54,7 +54,7 @@ def formula2a():
     def Person(x): return Atom('Person', x)        # whether x is a person
     def Mother(x, y): return Atom('Mother', x, y)  # whether x's mother is y
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return Forall(Variable('$x'), Implies(Person('$x'), Exists(Variable('$y'), Mother('$x', '$y'))))
     # END_YOUR_CODE
 
 # Sentence: "At least one person has no children."
@@ -63,7 +63,7 @@ def formula2b():
     def Person(x): return Atom('Person', x)        # whether x is a person
     def Child(x, y): return Atom('Child', x, y)    # whether x has a child y
     # BEGIN_YOUR_CODE (around 1 line of code expected)
-    raise Exception("Not implemented yet")
+    return Exists(Variable('$x'), And(Person('$x'), Forall(Variable('$y'), Not(Child('$x', '$y')))))
     # END_YOUR_CODE
 
 # Return a formula which defines Daughter in terms of Female and Child.
@@ -74,7 +74,7 @@ def formula2c():
     def Child(x, y): return Atom('Child', x, y)        # whether x has a child y
     def Daughter(x, y): return Atom('Daughter', x, y)  # whether x has a daughter y
     # BEGIN_YOUR_CODE (around 4 lines of code expected)
-    raise Exception("Not implemented yet")
+    return Forall('$x', Forall('$y', Equiv(And(Child('$x', '$y'), Female('$y')), Daughter('$x', '$y'))))
     # END_YOUR_CODE
 
 # Return a formula which defines Grandmother in terms of Female and Parent.
@@ -85,7 +85,26 @@ def formula2d():
     def Parent(x, y): return Atom('Parent', x, y)            # whether x has a parent y
     def Grandmother(x, y): return Atom('Grandmother', x, y)  # whether x has a grandmother y
     # BEGIN_YOUR_CODE (around 5 lines of code expected)
-    raise Exception("Not implemented yet")
+    def CheckGrandmother(x, y, z):
+        return  Equiv(
+                    And(
+                        And(
+                            Parent(x, y), 
+                            Parent(y, z)
+                        ), 
+                    Female(z)
+                    ),
+                Grandmother(x, z)
+                )
+        
+    return Forall('$x', 
+                  Forall('$y', 
+                         Forall('$z',
+                                CheckGrandmother('$x', '$y', '$z')
+                                )
+                         )
+                  )
+                                
     # END_YOUR_CODE
 
 # Return a formula which defines Ancestor in terms of Parent.
@@ -95,7 +114,28 @@ def formula2e():
     def Parent(x, y): return Atom('Parent', x, y)      # whether x has a parent y
     def Ancestor(x, y): return Atom('Ancestor', x, y)  # whether x has an ancestor y
     # BEGIN_YOUR_CODE (around 7 lines of code expected)
-    raise Exception("Not implemented yet")
+    def CheckAncestor(x, y):
+        return Or(
+                  Parent(x, y),
+                  Exists('$z', 
+                         And(
+                             And(
+                                 Not(Equals(x, '$z')),
+                                 Parent(x, '$z')
+                                 ),
+                             CheckAncestor('$z', y)
+                             )
+                         )
+                  )
+                  
+    return Forall('$x', 
+                  Forall('$y', 
+                      Equiv(
+                            CheckAncestor('$x', '$y'), 
+                            Ancestor('$x', '$y')
+                            )
+                      )
+                  )
     # END_YOUR_CODE
 
 ############################################################
@@ -126,7 +166,11 @@ def liar():
     formulas.append(Equiv(TellTruth(john), Not(CrashedServer(john))))
     # You should add 5 formulas, one for each of facts 1-5.
     # BEGIN_YOUR_CODE (around 11 lines of code expected)
-    raise Exception("Not implemented yet")
+    formulas.append(Equiv(TellTruth(susan), CrashedServer(nicole)))
+    formulas.append(Equiv(TellTruth(mark), CrashedServer(susan)))
+    formulas.append(Equiv(TellTruth(nicole), Not(TellTruth(susan))))
+    formulas.append(And(Forall('$x', Forall('$y', Implies(Not(Equals('$x', '$y')), Not(And(TellTruth('$x'), TellTruth('$y')))))), Exists('$z', TellTruth('$z'))))
+    formulas.append(And(Forall('$x', Forall('$y', Implies(Not(Equals('$x', '$y')), Not(And(CrashedServer('$x'), CrashedServer('$y')))))), Exists('$z', CrashedServer('$z'))))
     # END_YOUR_CODE
     query = CrashedServer('$x')
     return (formulas, query)
@@ -174,7 +218,16 @@ class ModusPonensRule(BinaryRule):
     def applyRule(self, form1, form2):
         if not form1.isa(Implies): return []  # Rule does not apply
         # BEGIN_YOUR_CODE (around 8 lines of code expected)
-        raise Exception("Not implemented yet")
+        flatForm1 = flattenAnd(form1.arg1)
+        flatForm2 = flattenAnd(form2)
+        for arg in flatForm2:
+            if arg in flatForm1:
+                flatForm1.remove(arg)
+        if len(flatForm1) == 0:
+            return [form1.arg2]
+        if len(flatForm1) == len(flattenAnd(form1.arg1)):
+            return []
+        return [Implies(AndList(flatForm1), form1.arg2)]
         # END_YOUR_CODE
 
 ############################################################
