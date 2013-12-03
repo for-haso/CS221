@@ -85,24 +85,22 @@ def formula2d():
     def Parent(x, y): return Atom('Parent', x, y)            # whether x has a parent y
     def Grandmother(x, y): return Atom('Grandmother', x, y)  # whether x has a grandmother y
     # BEGIN_YOUR_CODE (around 5 lines of code expected)
-    def CheckGrandmother(x, y, z):
+    def CheckGrandmother(x, z):
         return  Equiv(
                     And(
-                        And(
-                            Parent(x, y), 
-                            Parent(y, z)
-                        ), 
+                        Exists('$y', And(
+                            Parent(x, '$y'), 
+                            Parent('$y', z)
+                        )),
                     Female(z)
                     ),
                 Grandmother(x, z)
                 )
         
     return Forall('$x', 
-                  Forall('$y', 
-                         Forall('$z',
-                                CheckGrandmother('$x', '$y', '$z')
-                                )
-                         )
+                 Forall('$z',
+                        CheckGrandmother('$x', '$z')
+                        )  
                   )
                                 
     # END_YOUR_CODE

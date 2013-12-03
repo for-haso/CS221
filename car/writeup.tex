@@ -9,7 +9,7 @@
 \begin{tabular}{rl}
 SUNet ID: & nisham \\
 Name: & Nisha Masharani \\
-Collaborators: & esclee, sryoung
+Collaborators: & esclee
 \end{tabular}
 \end{center}
 
@@ -29,7 +29,7 @@ that all of this is my own work.
   &+& \left.\frac{1}{2}\left(p_{\mathcal N}(e_{12}; ||a_1 - c_{11}||, \sigma^2)p_{\mathcal N}(e_{11}; ||a_1 - c_{12}||, \sigma^2)\right)\right]
   \end{eqnarray*}
   \item If we want to maximize $p(c_{11}, \dots, c_{1K} \mid e_1)$, there is at least one set of locations $c_{11}, \dots, c_{1K}$ that will maximize this value by having all $c_{1i}$ such that the distance between $c_{1i}$ and $a_1$ uniquely is close to a $e_{1,j}$ in $e_1$. Since the probability for each car i to be at any location is constant, the cars at these optimal locations are interchangable. Therefore, we have $k$ locations, and $k$ cars, so there are $k!$ ways to put each of the cars into a location.
-  \item
-\end{enumerate}
+  \item At each timestep $t$, each observed distance $e_{ti}$ depends on the car locations $c_{t1}, ..., c_{tk}$, so there is a factor between each $e_{ti}$ and all $c_{t1}, ..., c_{tk}$. Alternately, we can think that all car locations $c_{t1}, ..., c_{tk}$ depends on each $e_{ti}$. If we condition on the values of $e_{t1}, ..., e_{tk}$, then we have that all car locations $c_{t1}, ..., c_{tk}$ are linked by $k$ factors that previously joined all car locations to each $e_{ti}$. Each of these $k$ factors has an arity of $k$. Each car location also depends on the previous car location, a factor which is not changed by eliminating $e_{t1}, ..., e_{tk}$. Therefore, the maximum arity after eliminating all $e_{t1}, ..., e_{tk}$ is $k$, so the tree width is $k$.
+  \end{enumerate}
 
 \end{document}
